@@ -8,8 +8,10 @@ import OrganizedView from '@/components/OrganizedView';
 
 // Define the type for categorized entries
 type Entry = {
+  id: string; // Added unique ID
   text: string;
   type: string;
+  priority: number; // Added priority field
 };
 
 // Define the type for the API response structure
@@ -23,8 +25,21 @@ export default function ClarityPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleCategorise = (data: CategoriseResponse) => {
-    setCategorizedEntries(data.entries || []); // Ensure entries is always an array
+    // Add unique IDs to incoming entries
+    const entriesWithIds = (data.entries || []).map((entry) => ({
+      ...entry,
+      id: crypto.randomUUID(),
+    }));
+    setCategorizedEntries(entriesWithIds);
     setErrorMessage(null); // Clear error on success
+  };
+
+  const handleUpdateCategory = (itemId: string, newCategory: string) => {
+    setCategorizedEntries((prevEntries) =>
+      prevEntries.map((entry) =>
+        entry.id === itemId ? { ...entry, type: newCategory } : entry
+      )
+    );
   };
 
   const handleError = (message: string) => {
@@ -64,7 +79,10 @@ export default function ClarityPage() {
       {!isLoading && categorizedEntries.length > 0 && (
         // Added margin-top for spacing
         <section className="mt-12">
-          <OrganizedView entries={categorizedEntries} />
+          <OrganizedView
+            entries={categorizedEntries}
+            onUpdateCategory={handleUpdateCategory} // Pass the handler
+          />
         </section>
       )}
 

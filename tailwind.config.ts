@@ -16,6 +16,6 @@ const config: Config = {
     },
   },
   plugins: [],
-  // darkMode: 'media', // Default strategy, explicitly stating for clarity
+  darkMode: false, // Explicitly disable dark mode
 }
 export default config

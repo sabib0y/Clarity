@@ -34,11 +34,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // Defaulting lang to 'en'
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}> {/* Added font variables */}
-      <body suppressHydrationWarning className="bg-white text-black dark:bg-gray-900 dark:text-gray-100">
-        {/* Added dark mode background and text color */}
-        {/* Removed PostHogProvider and DemoBadge wrappers */}
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      {/* Removed dark:bg-gray-900 dark:text-gray-100 to disable dark mode */}
+      <body suppressHydrationWarning className="bg-white text-black">
         {children}
       </body>
     </html>

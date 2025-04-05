@@ -13,8 +13,16 @@ interface SpeechRecognitionWindow extends Window {
 declare let window: SpeechRecognitionWindow;
 */
 
+// Define the updated Entry type matching the one in page.tsx
+type Entry = {
+  id: string; // Added unique ID
+  text: string;
+  type: string;
+  priority: number;
+};
+
 type MindDumpInputProps = {
-  onCategorise: (data: { entries: { text: string; type: string }[] }) => void;
+  onCategorise: (data: { entries: Entry[] }) => void; // Use the updated Entry type
   onError: (message: string) => void;
   setIsLoading: (isLoading: boolean) => void;
 };
@@ -165,7 +173,8 @@ const MindDumpInput: React.FC<MindDumpInputProps> = ({
 
 
   return (
-    <div className="flex flex-col space-y-4">
+    // Added container styling: white background, padding, rounded corners, shadow
+    <div className="flex flex-col space-y-6 rounded-lg bg-white p-6 shadow-md">
       <div className="relative w-full"> {/* Added relative container */}
         <textarea
           value={text}
@@ -173,8 +182,8 @@ const MindDumpInput: React.FC<MindDumpInputProps> = ({
           // Updated placeholder since dictation is commented out
           placeholder="Dump your thoughts here... (e.g., Book dentist appointment, Team call at 2pm, Feeling anxious...)"
           rows={10}
-          // Removed pr-10 since button is commented out
-          className="w-full rounded border border-gray-300 bg-white p-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
+          // Adjusted textarea styling: removed dark mode classes, slightly lighter border
+          className="w-full rounded border border-gray-200 bg-white p-3 text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 placeholder-gray-400"
         />
         {/* Temporarily commented out dictation button and related logic
         {isSpeechRecognitionSupported && (
@@ -195,10 +204,11 @@ const MindDumpInput: React.FC<MindDumpInputProps> = ({
         )}
         */}
       </div>
+      {/* Updated button styling to match image */}
       <button
         type="button"
         onClick={handleSubmit}
-        className="w-full rounded bg-blue-700 px-4 py-2 font-semibold text-white shadow hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-gray-600 dark:hover:bg-gray-500" // Dark mode button styles
+        className="self-center rounded-lg bg-gray-100 px-6 py-2 font-medium text-gray-800 shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
       >
         Categorise Thoughts
       </button>

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import * as chrono from 'chrono-node'; // Import chrono-node
 import {
   DndContext,
   closestCenter,
@@ -39,6 +40,7 @@ type TaskWithTime = Entry & {
 };
 
 // --- SortableTaskItem Component ---
+// (Component remains the same, no changes needed here for adding tasks)
 type SortableTaskItemProps = {
   task: TaskWithTime;
   index: number; // Keep index for handlers that might still rely on it
@@ -82,16 +84,16 @@ function SortableTaskItem({
     <div
       ref={setNodeRef}
       style={style}
-      {...attributes} // Apply attributes to the main div
-      // Changed dark background for better layering
-      className={`flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 p-4 shadow-sm dark:border-gray-600 dark:bg-slate-800`}
+      {...attributes}
+      // Updated styling for task items: removed bg, border, shadow; adjusted padding
+      className={`flex items-center justify-between rounded-md p-3`}
     >
       {/* Drag Handle */}
-      <div {...listeners} className={`mr-3 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}> {/* Apply listeners and cursor style only to the handle */}
+      <div {...listeners} className={`mr-3 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}>
         <DragHandleIcon />
       </div>
       {/* Task Text */}
-      <span className="flex-grow pr-4 text-gray-800 dark:text-gray-300">{task.text}</span>
+      <span className="flex-grow pr-4 text-sm text-gray-800">{task.text}</span> {/* Adjusted text size */}
       {/* Controls */}
       <div className="relative flex items-center space-x-2">
         <input
@@ -99,24 +101,23 @@ function SortableTaskItem({
           placeholder="8:00 AM"
           value={task.timeSlot}
           onChange={e => handleTimeSlotChange(index, e.target.value)}
-          onClick={(e) => e.stopPropagation()} // Prevent drag start on input click
-          // Added rounded-md, lightened dark text
-          className="w-24 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-400"
+          onClick={(e) => e.stopPropagation()}
+          // Adjusted input styling: removed dark styles
+          className="w-24 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-900 placeholder-gray-400"
         />
         {/* Split Button Container */}
-        {/* Ensured container has rounded corners */}
-        <div className="flex rounded-md shadow" onClick={(e) => e.stopPropagation()} /* Prevent drag start on button clicks */>
+        <div className="flex rounded-md shadow-sm" onClick={(e) => e.stopPropagation()}> {/* Added shadow-sm */}
           {/* Main Action Button */}
           <button
             type="button"
             onClick={() => setReminder(index)}
             disabled={task.reminderSet}
             title={task.reminderSet ? 'Reminder set' : 'Set reminder at specified time'}
-            // Ensured rounded-l-md
-            className={`rounded-l-md border-r border-blue-800 dark:border-gray-700 px-3 py-1 text-sm font-medium text-white ${
+            // Adjusted button styling: simpler gray, removed dark styles
+            className={`rounded-l-md border-r border-gray-400 px-3 py-1 text-sm font-medium ${
               task.reminderSet
-                ? 'cursor-not-allowed bg-gray-400 dark:bg-gray-600'
-                : 'bg-blue-700 hover:bg-blue-800 dark:bg-gray-600 dark:hover:bg-gray-500'
+                ? 'cursor-not-allowed bg-gray-300 text-gray-500'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
             {task.reminderSet ? 'Set' : 'Remind'}
@@ -127,11 +128,11 @@ function SortableTaskItem({
             onClick={() => toggleDropdown(index)}
             disabled={task.reminderSet}
             title="Reminder options"
-            // Ensured rounded-r-md
-            className={`rounded-r-md px-2 py-1 text-sm font-medium text-white ${
+            // Adjusted button styling: simpler gray, removed dark styles
+            className={`rounded-r-md px-2 py-1 text-sm font-medium ${
               task.reminderSet
-                ? 'cursor-not-allowed bg-gray-400 dark:bg-gray-600'
-                : 'bg-blue-700 hover:bg-blue-800 dark:bg-gray-600 dark:hover:bg-gray-500'
+                ? 'cursor-not-allowed bg-gray-300 text-gray-500'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="h-3 w-3">
@@ -143,19 +144,20 @@ function SortableTaskItem({
         {/* Dropdown Menu */}
         {task.isDropdownOpen && !task.reminderSet && (
           <div
-            // Added rounded-md and shadow-lg (already present but confirmed), adjusted padding
-            className="absolute right-0 top-full z-10 mt-1 w-48 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-700 dark:ring-gray-600"
-            onClick={(e) => e.stopPropagation()} // Prevent drag start on dropdown click
+            // Adjusted dropdown styling: removed dark styles
+            className="absolute right-0 top-full z-10 mt-1 w-48 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+            onClick={(e) => e.stopPropagation()}
           >
-            {/* Added Label */}
-            <span className="block px-4 pt-0 pb-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+            {/* Label */}
+            <span className="block px-4 pt-0 pb-2 text-xs font-medium text-gray-500">
               Remind me...
             </span>
             {/* Option 1 */}
             <button
               type="button"
               onClick={() => setReminder(index, 15)}
-              className="flex w-full items-center justify-between px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600"
+              // Adjusted dropdown item styling: removed dark styles
+              className="flex w-full items-center justify-between px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
             >
               <span>15 mins before</span>
               {/* Placeholder for checkmark - Add logic later if needed */}
@@ -165,7 +167,8 @@ function SortableTaskItem({
             <button
               type="button"
               onClick={() => setReminder(index, 30)}
-              className="flex w-full items-center justify-between px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600"
+              // Adjusted dropdown item styling: removed dark styles
+              className="flex w-full items-center justify-between px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
             >
               <span>30 mins before</span>
               {/* Placeholder for checkmark */}
@@ -180,58 +183,66 @@ function SortableTaskItem({
 
 // --- DailyPlanner Component ---
 const DailyPlanner: React.FC<DailyPlannerProps> = ({ entries }) => {
-  // Helper to generate unique IDs - simple approach for now
-  const generateId = (text: string, index: number) => `task-${index}-${text.slice(0, 10).replace(/\s+/g, '-')}`;
+  // State for the new task input
+  const [newTaskText, setNewTaskText] = useState('');
+  // Counter for unique IDs for manually added tasks
+  const [newTaskCounter, setNewTaskCounter] = useState(0);
 
-  // Function to map and sort entries
-  const mapAndSortEntriesToTasks = (entriesToMap: Entry[], existingTasks: TaskWithTime[] = []): TaskWithTime[] => {
-    const existingTaskMap = new Map(existingTasks.map(t => [t.id, t]));
+  // Helper to generate unique IDs - adapted for manual adds
+  const generateId = useCallback((text: string, index: number, manualCounter?: number) => {
+    // Use counter for manual adds to ensure uniqueness even if text is similar/empty initially
+    const suffix = manualCounter !== undefined ? `manual-${manualCounter}` : `api-${index}`;
+    return `task-${suffix}-${text.slice(0, 10).replace(/\s+/g, '-')}`;
+  }, []); // No dependencies, function is stable
+
+  // Function to map and sort entries from API (Mind Dump)
+  // This function now ONLY handles the initial load/overwrite from Mind Dump entries
+  const mapAndSortEntriesFromAPI = useCallback((entriesToMap: Entry[]): TaskWithTime[] => {
     const mappedTasks = entriesToMap
       .filter(entry => entry.type === 'task')
       .map((task, index) => {
-        const id = generateId(task.text, index); // Generate ID based on initial position/text
-        const existingTask = existingTaskMap.get(id);
+        const id = generateId(task.text, index); // Generate ID based on API index/text
         return {
           ...task,
           id,
           priority: task.priority ?? 5, // Default priority if missing
-          timeSlot: existingTask?.timeSlot || '',
-          reminderSet: existingTask?.reminderSet || false,
-          isDropdownOpen: existingTask?.isDropdownOpen || false,
+          timeSlot: '', // Reset timeSlot on overwrite
+          reminderSet: false, // Reset reminderSet on overwrite
+          isDropdownOpen: false, // Reset dropdown on overwrite
         };
       });
     // Sort by priority
     return mappedTasks.sort((a, b) => a.priority - b.priority);
-  };
+  }, [generateId]); // Dependency on generateId
 
-  // Initialize state with sorted tasks
-  const [tasks, setTasks] = useState<TaskWithTime[]>(() => mapAndSortEntriesToTasks(entries));
+  // Initialize state with sorted tasks from initial entries
+  const [tasks, setTasks] = useState<TaskWithTime[]>(() => mapAndSortEntriesFromAPI(entries));
 
-  // Update tasks if the entries prop changes, preserving order and state, then re-sort
+  // Update tasks ONLY when the entries prop changes (Mind Dump submitted)
+  // This implements the user's request to OVERWRITE the planner state
   useEffect(() => {
-    setTasks(currentTasks => {
-      const newTasksFromEntries = mapAndSortEntriesToTasks(entries, currentTasks); // Map and sort new entries
-      // Create a map of new tasks for quick lookup
-      const newTaskMap = new Map(newTasksFromEntries.map(t => [t.id, t]));
-      // Filter current tasks to keep only those still present in new entries, maintaining DND order
-      const updatedTasks = currentTasks.filter(t => newTaskMap.has(t.id)); // Changed let to const
-      // Add any truly new tasks (that weren't in currentTasks)
-      newTasksFromEntries.forEach(newTask => {
-        if (!currentTasks.some(t => t.id === newTask.id)) {
-          // Find appropriate insertion point based on priority, respecting existing DND order
-          let insertIndex = updatedTasks.findIndex(t => t.priority > newTask.priority);
-          if (insertIndex === -1) {
-             insertIndex = updatedTasks.length; // Insert at the end if no higher priority found
-          }
-          updatedTasks.splice(insertIndex, 0, newTask);
-        }
-      });
-      // Ensure final list is sorted primarily by priority, but maintain relative DND order within priorities
-      // This simple sort might override DND order if priorities change drastically.
-      // A more complex merge might be needed for perfect DND preservation across priority changes.
-      return updatedTasks.sort((a, b) => a.priority - b.priority);
-    });
-  }, [entries]); // Rerun only when entries change
+    setTasks(mapAndSortEntriesFromAPI(entries));
+  }, [entries, mapAndSortEntriesFromAPI]); // Rerun only when entries change
+
+  // Handler for adding a new task manually
+  const handleAddTask = () => {
+    if (!newTaskText.trim()) return; // Don't add empty tasks
+
+    const newTaskId = generateId(newTaskText, -1, newTaskCounter); // Use counter for ID
+    const newTask: TaskWithTime = {
+      id: newTaskId,
+      text: newTaskText.trim(),
+      type: 'task', // Default type
+      priority: 5, // Default priority
+      timeSlot: '',
+      reminderSet: false,
+      isDropdownOpen: false,
+    };
+
+    setTasks(currentTasks => [...currentTasks, newTask]); // Append the new task
+    setNewTaskText(''); // Clear the input field
+    setNewTaskCounter(prev => prev + 1); // Increment counter for next manual add
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -263,28 +274,120 @@ const DailyPlanner: React.FC<DailyPlannerProps> = ({ entries }) => {
     );
   };
 
-  const setReminder = (index: number, offsetMinutes: number = 0) => {
+  // Updated setReminder function
+  const setReminder = async (index: number, offsetMinutes: number = 0) => {
     const taskId = tasks[index]?.id;
-    const task = tasks.find(t => t.id === taskId); // Find task by ID
+    const task = tasks.find(t => t.id === taskId);
 
-    if (task && task.timeSlot && !task.reminderSet) {
-      const reminderTimeInfo = offsetMinutes > 0 ? `${offsetMinutes} mins before ${task.timeSlot}` : `at ${task.timeSlot}`;
-      alert(`Reminder set for "${task.text}" ${reminderTimeInfo} (simulated).`);
-      setTimeout(() => {
-        alert(`Reminder: ${task.text} - ${reminderTimeInfo}`);
-      }, 5000);
+    if (!task) return;
 
+    if (task.reminderSet) {
+      alert('Reminder already set for this task.');
+      return;
+    }
+
+    if (!task.timeSlot) {
+      alert('Please enter a time/date before setting a reminder.');
+      return;
+    }
+
+    // Parse the date/time string using chrono-node
+    const now = new Date();
+    // Use chrono.parse to get detailed results and apply options
+    const results = chrono.parse(task.timeSlot, new Date(), { forwardDate: true });
+
+    // Check if chrono found a valid date/time
+    if (results.length === 0 || !results[0].start) {
+      alert(`Could not understand the time: "${task.timeSlot}". Please try a different format (e.g., "10:30am", "2pm today", "14:00").`);
+      console.error(`[Clarity] Chrono could not parse: "${task.timeSlot}"`); // Log parsing failure
+      alert(`Could not understand the time: "${task.timeSlot}". Please try a different format (e.g., "10:30am", "2pm today", "14:00").`);
+      return;
+    }
+
+    const parsedDate = results[0].start.date(); // Get the Date object
+    console.log('[Clarity] Parsed Date:', parsedDate); // Log parsed date
+
+    // Apply offset if specified
+    let targetTime = parsedDate.getTime();
+    if (offsetMinutes > 0) {
+      targetTime -= offsetMinutes * 60 * 1000; // Subtract offset in milliseconds
+    }
+
+    const targetDate = new Date(targetTime);
+    console.log('[Clarity] Target Date (after offset):', targetDate); // Log target date
+
+    // Check if the target time is in the past
+    if (targetDate.getTime() <= now.getTime()) {
+      console.warn('[Clarity] Target time is in the past:', targetDate); // Log past time warning
+      alert(`The specified time (${targetDate.toLocaleTimeString()}) is in the past.`);
+      return;
+    }
+
+    // Check if the target date is today (as per plan)
+    const isToday = targetDate.getFullYear() === now.getFullYear() &&
+                    targetDate.getMonth() === now.getMonth() &&
+                    targetDate.getDate() === now.getDate();
+
+    if (!isToday) {
+      alert(`Reminder set for "${task.text}" at ${targetDate.toLocaleString()}. (Note: PoC only triggers notifications for today).`);
+      // Still mark reminder as set visually, even if notification won't fire today
       setTasks(currentTasks =>
         currentTasks.map(t =>
           t.id === taskId ? { ...t, reminderSet: true, isDropdownOpen: false } : t
         )
       );
-    } else if (task?.reminderSet) {
-      alert('Reminder already set for this task.');
-    } else {
-      alert('Please enter a time slot before setting a reminder.');
+      return; // Don't schedule timeout if not today
+    }
+
+    // --- Browser Notification Logic ---
+    if (!('Notification' in window)) {
+      alert('This browser does not support desktop notification');
+      return;
+    }
+
+    try {
+      const permission = await Notification.requestPermission();
+      console.log('[Clarity] Notification permission:', permission); // Log permission status
+      if (permission === 'granted') {
+        const delay = targetTime - now.getTime();
+        console.log(`[Clarity] Scheduling notification with delay: ${delay}ms`); // Log delay
+        const reminderTimeInfo = offsetMinutes > 0
+          ? `${offsetMinutes} mins before ${parsedDate.toLocaleTimeString()}`
+          : `at ${parsedDate.toLocaleTimeString()}`;
+
+        setTimeout(() => {
+          console.log(`[Clarity] Firing notification for: ${task.text}`); // Log inside timeout
+          new Notification('Clarity Reminder', {
+            body: `${task.text} - ${reminderTimeInfo}`,
+            // icon: '/favicons/favicon-32x32.png' // Optional: Add an icon
+          });
+          // Optionally reset reminderSet state after notification fires
+          // setTasks(currentTasks =>
+          //   currentTasks.map(t =>
+          //     t.id === taskId ? { ...t, reminderSet: false } : t
+          //   )
+          // );
+        }, delay);
+
+        alert(`Reminder scheduled for "${task.text}" ${reminderTimeInfo}.`);
+        // Mark reminder as set visually
+        setTasks(currentTasks =>
+          currentTasks.map(t =>
+            t.id === taskId ? { ...t, reminderSet: true, isDropdownOpen: false } : t
+          )
+        );
+
+      } else if (permission === 'denied') {
+        alert('Notification permission denied. Please enable notifications in browser settings.');
+      } else {
+        alert('Notification permission not granted.');
+      }
+    } catch (error) {
+      console.error('Error requesting notification permission:', error);
+      alert('Could not set reminder due to an error.');
     }
   };
+
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -301,45 +404,117 @@ const DailyPlanner: React.FC<DailyPlannerProps> = ({ entries }) => {
       });
     }
   };
+  // --- Removed Test Notification Function ---
 
-  // Use the state directly as it's now managed with sorting/DND
-  const tasksToPlan = tasks;
+  // --- Grouping Logic ---
+  const priorityMap: Record<number, string> = {
+    1: 'Morning',
+    2: 'Midday',
+    3: 'Afternoon',
+    4: 'Evening',
+    5: 'Anytime / Flexible',
+  };
 
-  if (tasksToPlan.length === 0) {
-    return (
-      <div>
-        <h2 className="mb-4 text-xl font-semibold">Daily Planner</h2>
-        <p className="text-gray-600 dark:text-gray-400">No tasks found to plan.</p>
-      </div>
-    );
-  }
+  const groupedTasks = tasks.reduce((acc, task) => {
+    const groupName = priorityMap[task.priority] || 'Anytime / Flexible'; // Default to Anytime
+    if (!acc[groupName]) {
+      acc[groupName] = [];
+    }
+    acc[groupName].push(task);
+    return acc;
+  }, {} as Record<string, TaskWithTime[]>);
+
+  // Define the order for the groups
+  const groupOrder = ['Morning', 'Midday', 'Afternoon', 'Evening', 'Anytime / Flexible'];
+
+  // Get sorted group names based on the defined order
+  const sortedGroupNames = Object.keys(groupedTasks).sort((a, b) => {
+    const indexA = groupOrder.indexOf(a);
+    const indexB = groupOrder.indexOf(b);
+    // Handle cases where a group might not be in groupOrder (shouldn't happen with default)
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+  });
+  // --- End Grouping Logic ---
+
+  // Use the state directly - tasks are already sorted by priority initially
+  // const tasksToPlan = tasks; // We will use groupedTasks now
 
   return (
-    <div className="space-y-4">
-      <h2 className="mb-4 text-xl font-semibold text-gray-800 dark:text-gray-200">Daily Planner</h2>
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={tasks.map(task => task.id)} // Pass array of IDs
-          strategy={verticalListSortingStrategy}
+    <div className="space-y-6"> {/* Increased spacing */}
+      {/* Adjusted section title styling */}
+      <h2 className="mb-6 text-xl font-semibold text-gray-900">Daily Planner</h2>
+
+      {/* Input for adding new tasks - Keep existing style for now */}
+      <div className="flex space-x-2">
+        <input
+          type="text"
+          value={newTaskText}
+          onChange={(e) => setNewTaskText(e.target.value)}
+          placeholder="Add a new task directly..."
+          // Setting input styling based on dev tools: bg-slate-700, border-slate-600
+          className="flex-grow rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 placeholder-gray-400"
+          onKeyDown={(e) => { if (e.key === 'Enter') handleAddTask(); }} // Allow adding with Enter key
+        />
+        <button
+          type="button"
+          onClick={handleAddTask}
+          className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:bg-green-700 dark:hover:bg-green-600"
         >
-          <div className="space-y-3">
-            {tasksToPlan.map((task, index) => (
-              <SortableTaskItem
-                key={task.id} // Use unique ID as key
-                task={task}
-                index={index} // Pass index for handlers
-                handleTimeSlotChange={handleTimeSlotChange}
-                setReminder={setReminder}
-                toggleDropdown={toggleDropdown}
-              />
+          Add Task
+        </button>
+        {/* Removed Test Notification Button */}
+      </div>
+
+      {/* Display message if no tasks */}
+      {tasks.length === 0 && (
+         <p className="pt-2 text-gray-600 dark:text-gray-400">No tasks in the planner. Add some above or via the Mind Dump.</p>
+      )}
+
+      {/* Render grouped tasks */}
+      {tasks.length > 0 && (
+         <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          {/* We need SortableContext PER GROUP if we want drag-and-drop within groups */}
+          {/* For now, render groups without intra-group sorting for simplicity */}
+          {/* To enable sorting within groups, wrap each group's list in SortableContext */}
+          <div className="space-y-6">
+            {sortedGroupNames.map(groupName => (
+              // Apply card styling to group container
+              <div key={groupName} className="rounded-lg bg-white p-4 shadow-md">
+                {/* Adjusted group title styling */}
+                <h3 className="mb-3 text-md font-medium text-gray-800">{groupName}</h3>
+                {/* Wrap this div in SortableContext for intra-group sorting */}
+                <SortableContext
+                   items={groupedTasks[groupName].map(task => task.id)} // IDs for this group
+                   strategy={verticalListSortingStrategy}
+                 >
+                  <div className="space-y-3">
+                    {groupedTasks[groupName].map((task) => {
+                      // Find the original index in the main 'tasks' array for handlers
+                      const originalIndex = tasks.findIndex(t => t.id === task.id);
+                      return (
+                        <SortableTaskItem
+                          key={task.id}
+                          task={task}
+                          index={originalIndex} // Use original index for handlers
+                          handleTimeSlotChange={handleTimeSlotChange}
+                          setReminder={setReminder}
+                          toggleDropdown={toggleDropdown}
+                        />
+                      );
+                    })}
+                  </div>
+                </SortableContext>
+              </div>
             ))}
           </div>
-        </SortableContext>
-      </DndContext>
+        </DndContext>
+      )}
     </div>
   );
 };
