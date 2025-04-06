@@ -1,6 +1,7 @@
-// jest.config.js
+// jest.config.cjs
 // Revert ESLint disable comment - accept the warning for now
-import nextJest from 'next/jest';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const nextJest = require('next/jest');
 
 // Providing the path to your Next.js app to load next.config.js and .env files in your test environment
 const createJestConfig = nextJest({

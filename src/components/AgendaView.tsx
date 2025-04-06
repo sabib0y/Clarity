@@ -33,9 +33,13 @@ const AgendaView: React.FC = () => {
     // Single container with card styling - REMOVED dark:bg-gray-800
     <div className="bg-white rounded-lg shadow p-4 space-y-4">
       {/* Month Navigator Wrapper */}
-      {/* Pass the new handler to MonthNavigator */}
+      {/* Pass the new handler and entries to MonthNavigator */}
       <div className="day-picker-wrapper flex justify-center">
-         <MonthNavigator selectedDate={selectedDate} onSelectDate={handleCalendarChange} />
+         <MonthNavigator
+            selectedDate={selectedDate}
+            onSelectDate={handleCalendarChange}
+            entries={categorizedEntries} // Pass entries down
+         />
       </div>
 
       {/* Divider (optional) */}

@@ -1,10 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-// Removed explicit import of describe, test, expect, jest, beforeEach
-import MindDumpInput from './MindDumpInput'; // Adjust the import path as necessary
+import MindDumpInput from './MindDumpInput';
 
-// Mock the global fetch function
 global.fetch = jest.fn();
 
 describe('MindDumpInput Component', () => {
@@ -13,9 +11,7 @@ describe('MindDumpInput Component', () => {
   const mockSetIsLoading = jest.fn();
 
   beforeEach(() => {
-    // Reset mocks before each test
     jest.clearAllMocks();
-    // Reset fetch mock to a default successful response for simplicity in basic tests
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: async () => ({ entries: [{ text: 'Test task', type: 'task', priority: 1 }] }),
@@ -68,11 +64,9 @@ describe('MindDumpInput Component', () => {
     fireEvent.change(textarea, { target: { value: inputText } });
     fireEvent.click(button);
 
-    // Check loading state changes
     expect(mockSetIsLoading).toHaveBeenCalledWith(true);
-    expect(mockOnError).toHaveBeenCalledWith(null); // Error cleared (should be null)
+    expect(mockOnError).toHaveBeenCalledWith(null);
 
-    // Check fetch call
     expect(global.fetch).toHaveBeenCalledWith('/api/categorise', {
       method: 'POST',
       headers: {
@@ -81,17 +75,14 @@ describe('MindDumpInput Component', () => {
       body: JSON.stringify({ text: inputText }),
     });
 
-    // Wait for the fetch promise to resolve and state updates to occur
     await waitFor(() => {
       expect(mockOnCategorise).toHaveBeenCalledWith({ entries: [{ text: 'Test task', type: 'task', priority: 1 }] });
     });
 
-    // Check loading state reset
     expect(mockSetIsLoading).toHaveBeenCalledWith(false);
   });
 
   test('calls onError and handlers on failed API call', async () => {
-     // Mock fetch to return an error response
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: false,
       status: 500,
@@ -116,7 +107,6 @@ describe('MindDumpInput Component', () => {
     expect(mockSetIsLoading).toHaveBeenCalledWith(true);
     expect(global.fetch).toHaveBeenCalledTimes(1);
 
-    // Wait for the fetch promise to resolve and error handling to occur
     await waitFor(() => {
       expect(mockOnError).toHaveBeenCalledWith('Internal Server Error');
     });
@@ -124,5 +114,4 @@ describe('MindDumpInput Component', () => {
     expect(mockSetIsLoading).toHaveBeenCalledWith(false);
   });
 
-  // Add more tests later for speech recognition if uncommented
 });

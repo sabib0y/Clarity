@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { parseISO, isValid, format, isSameDay, isSameWeek, isSameMonth, isSameYear } from 'date-fns'; // Import date-fns helpers
+import { parseISO, isValid, format, isSameDay, isSameWeek, isSameMonth, isSameYear } from 'date-fns';
 import { useEntries } from '@/context/EntriesContext';
 import type { Entry } from '@/types';
 import {
@@ -18,23 +18,20 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
   useSortable,
-  arrayMove, // Import arrayMove utility
+  arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import Link from 'next/link'; // Import Link
-import AgendaView from './AgendaView'; // Import the AgendaView component
+import Link from 'next/link';
+import AgendaView from './AgendaView';
 
-// --- SortableTaskItem Component ---
+
 type SortableTaskItemProps = {
   task: Entry;
-  // handleSetReminderStatus: (itemId: string, isSet: boolean) => void; // Removed prop
 };
 
-// --- Reminder Logic Removed ---
 
 function SortableTaskItem({ task }: SortableTaskItemProps) {
-  const { handleToggleComplete } = useEntries(); // Get the handler from context
-  // const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Removed dropdown state
+  const { handleToggleComplete } = useEntries();
 
   const {
     attributes,
@@ -63,29 +60,22 @@ function SortableTaskItem({ task }: SortableTaskItemProps) {
       ref={setNodeRef}
       style={style}
       {...attributes}
-      // Removed justify-between, added space-x-3 for checkbox spacing
       className={`flex items-center rounded-md p-3 space-x-3`}
     >
-      {/* Checkbox */}
       <input
         type="checkbox"
         checked={!!task.isCompleted}
         onChange={() => handleToggleComplete(task.id)}
         className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-        // Prevent drag-and-drop from interfering with checkbox click
         onClick={(e) => e.stopPropagation()}
       />
-      {/* Drag Handle */}
       <div {...listeners} className={`${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}>
         <DragHandleIcon />
       </div>
-      {/* Task Text (Now a Link) */}
       <Link href={`/entry/${task.id}`} className={`flex-grow text-sm text-gray-800 hover:text-indigo-600 ${task.isCompleted ? 'line-through opacity-50' : ''}`}>
         {task.text}
       </Link>
-      {/* Controls: Display Time Info */}
-      <div className="relative flex items-center space-x-2 ml-auto"> {/* Added ml-auto to push time to the right */}
-        {/* Display Start/End Time */}
+      <div className="relative flex items-center space-x-2 ml-auto">
         <div className="text-xs text-gray-600">
           {task.startTime && isValid(parseISO(task.startTime)) ? (
             <>
@@ -98,70 +88,62 @@ function SortableTaskItem({ task }: SortableTaskItemProps) {
             <span className="italic text-gray-400">Not scheduled</span>
           )}
         </div>
-        {/* Reminder Button Container Removed */}
       </div>
     </div>
   );
 }
 
-// --- DailyPlanner Component ---
 const DailyPlanner: React.FC = () => {
   const {
      categorizedEntries,
-     handleReorderEntries, // Import the reorder handler
-     handleAddTaskDirectly, // Import the add task handler
-     // handleSetReminderStatus, // Removed context usage
+     handleReorderEntries,
+     handleAddTaskDirectly,
   } = useEntries();
 
-  // State for view mode and time filter
   const [activeView, setActiveView] = useState<'list' | 'calendar'>('list');
   const [selectedTimeFilter, setSelectedTimeFilter] = useState<'day' | 'week' | 'month' | 'year' | 'all'>('all');
 
 
   const tasks = useMemo(() => {
-    const now = new Date(); // Get current date for comparison
+    const now = new Date();
 
     const filteredTasks = categorizedEntries.filter(entry => {
-      // Only include tasks
       if (entry.type !== 'task') {
         return false;
       }
 
-      // Always include tasks without a valid startTime
       if (!entry.startTime || !isValid(parseISO(entry.startTime))) {
         return true;
       }
 
       const taskDate = parseISO(entry.startTime);
 
-      // Apply filter based on selectedTimeFilter
       switch (selectedTimeFilter) {
         case 'day':
           return isSameDay(taskDate, now);
         case 'week':
-          return isSameWeek(taskDate, now, { weekStartsOn: 1 }); // Assuming Monday start of week
+          return isSameWeek(taskDate, now, { weekStartsOn: 1 });
         case 'month':
           return isSameMonth(taskDate, now);
         case 'year':
           return isSameYear(taskDate, now);
         case 'all':
         default:
-          return true; // Include all tasks if filter is 'all' or unknown
+          return true;
       }
     });
 
-    // Sort the filtered tasks by priority
     return filteredTasks.sort((a, b) => a.priority - b.priority);
 
-  }, [categorizedEntries, selectedTimeFilter]); // Add selectedTimeFilter dependency
+  }, [categorizedEntries, selectedTimeFilter]);
 
   const [newTaskText, setNewTaskText] = useState('');
 
   const handleAddTask = () => {
     const trimmedText = newTaskText.trim();
     if (!trimmedText) return;
-    handleAddTaskDirectly(trimmedText); // Call context handler
-    setNewTaskText(''); // Clear input field
+    handleAddTaskDirectly(trimmedText);
+    setNewTaskText('');
   };
 
   const sensors = useSensors(
@@ -175,18 +157,14 @@ const DailyPlanner: React.FC = () => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      // Note: This currently reorders ALL categorized entries,
-      // not just tasks within a specific priority group.
-      // A more refined approach might involve reordering within groups
-      // or updating priorities based on the new position.
-      // For now, we implement simple reordering of the entire list.
+
 
       const oldIndex = categorizedEntries.findIndex((entry) => entry.id === active.id);
       const newIndex = categorizedEntries.findIndex((entry) => entry.id === over.id);
 
       if (oldIndex !== -1 && newIndex !== -1) {
         const reorderedEntries = arrayMove(categorizedEntries, oldIndex, newIndex);
-        handleReorderEntries(reorderedEntries); // Update context state
+        handleReorderEntries(reorderedEntries);
       } else {
         console.warn('Could not find dragged item or drop target in entries list.');
       }
@@ -222,9 +200,8 @@ const DailyPlanner: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="mb-4 text-xl font-semibold text-gray-900">Daily Planner</h2> {/* Reduced margin */}
+      <h2 className="mb-4 text-xl font-semibold text-gray-900">Daily Planner</h2>
 
-      {/* View Mode Tabs */}
       <div className="mb-4 border-b border-gray-200">
         <nav className="-mb-px flex space-x-8" aria-label="Tabs">
           <button
@@ -250,10 +227,8 @@ const DailyPlanner: React.FC = () => {
         </nav>
       </div>
 
-      {/* Conditional Content based on activeView */}
       {activeView === 'list' && (
         <>
-          {/* Add Task Input */}
           <div className="flex space-x-2">
             <input
               type="text"
@@ -272,7 +247,6 @@ const DailyPlanner: React.FC = () => {
             </button>
           </div>
 
-          {/* Time Filter Buttons */}
           <div className="my-4 flex justify-center space-x-2 rounded-md bg-gray-100 p-1">
             {(['day', 'week', 'month', 'year', 'all'] as const).map((filter) => (
               <button
@@ -290,9 +264,8 @@ const DailyPlanner: React.FC = () => {
           </div>
 
 
-          {/* Task List */}
           {tasks.length === 0 && (
-             <p className="pt-2 text-gray-600 dark:text-gray-400">No tasks match the current filter.</p> // Updated message
+             <p className="pt-2 text-gray-600 dark:text-gray-400">No tasks match the current filter.</p>
           )}
 
           {tasks.length > 0 && (
@@ -314,7 +287,6 @@ const DailyPlanner: React.FC = () => {
                       <SortableTaskItem
                         key={task.id}
                         task={task}
-                        // handleSetReminderStatus={handleSetReminderStatus} // Removed prop passing
                       />
                     ))}
                   </div>
@@ -328,7 +300,6 @@ const DailyPlanner: React.FC = () => {
       )}
 
       {activeView === 'calendar' && (
-        // Render the AgendaView component when the calendar tab is active
         <AgendaView />
       )}
     </div>

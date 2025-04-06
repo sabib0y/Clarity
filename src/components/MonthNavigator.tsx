@@ -1,36 +1,61 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css'; // Import default styles for react-calendar
-import { format } from 'date-fns';
+import 'react-calendar/dist/Calendar.css';
+import { format, parseISO, isValid, isSameDay, eachDayOfInterval, startOfDay } from 'date-fns';
+import type { Entry } from '@/types';
 
-// Define the type for the value state and onChange handler
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
 
 interface MonthNavigatorProps {
   selectedDate: Date | undefined;
-  // react-calendar uses onChange which returns Value type
   onSelectDate: (value: Value) => void;
+  entries: Entry[];
 }
 
-const MonthNavigator: React.FC<MonthNavigatorProps> = ({ selectedDate, onSelectDate }) => {
+const MonthNavigator: React.FC<MonthNavigatorProps> = ({ selectedDate, onSelectDate, entries }) => {
 
-  // Handler to adapt react-calendar's onChange to our expected single date format
+  const datesWithEntries = useMemo(() => {
+    const dates = new Set<string>();
+    entries.forEach(entry => {
+      if (entry.startTime && isValid(parseISO(entry.startTime))) {
+        const startDate = startOfDay(parseISO(entry.startTime));
+        let endDate = startDate;
+
+        if (entry.endTime && isValid(parseISO(entry.endTime))) {
+          const parsedEndTime = startOfDay(parseISO(entry.endTime));
+          if (parsedEndTime > startDate) {
+            endDate = parsedEndTime;
+          }
+        }
+
+        try {
+           const intervalDates = eachDayOfInterval({ start: startDate, end: endDate });
+           intervalDates.forEach(intervalDate => {
+             dates.add(format(intervalDate, 'yyyy-MM-dd'));
+           });
+        } catch (error) {
+           console.error("Error calculating date interval for entry:", entry.id, error);
+           dates.add(format(startDate, 'yyyy-MM-dd'));
+        }
+
+      }
+    });
+    return dates;
+  }, [entries]);
+
   const handleChange = (value: Value) => {
-    // We only care about single date selection
     if (value instanceof Date) {
       onSelectDate(value);
     } else if (Array.isArray(value) && value[0] instanceof Date) {
-      // If it returns a range, take the start date
        onSelectDate(value[0]);
      } else {
-        onSelectDate(null); // Pass null instead of undefined
+        onSelectDate(null);
      }
    };
 
-  // Basic footer showing selected date
   const footer = selectedDate ? (
     <p className="text-center text-sm mt-4 text-gray-600 dark:text-gray-400">
       You selected {format(selectedDate, 'PPP')}.
@@ -46,18 +71,20 @@ const MonthNavigator: React.FC<MonthNavigatorProps> = ({ selectedDate, onSelectD
       <Calendar
         onChange={handleChange}
         value={selectedDate}
-        // Basic Tailwind styling via className prop
-        // These target the default classes provided by react-calendar
-        className="react-calendar bg-transparent border-none" // Remove default border/bg
+        className="react-calendar bg-transparent border-none"
         tileClassName={({ date, view }) => {
-          // Add custom classes to tiles (days)
-          const classes = ['rounded-full flex items-center justify-center h-9 w-9'];
+          const classes = ['react-calendar__tile--custom rounded-full flex items-center justify-center h-9 w-9'];
+          const dateString = format(date, 'yyyy-MM-dd');
+
           if (view === 'month') {
-            // Add hover effect for non-disabled days
             classes.push('hover:bg-gray-100 dark:hover:bg-gray-700');
-            // Style today's date
-            if (format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')) {
-              classes.push('bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-100');
+
+            if (dateString === format(new Date(), 'yyyy-MM-dd') && !isSameDay(date, selectedDate || new Date(0))) {
+              classes.push('!bg-gray-200 dark:!bg-gray-600 !text-gray-900 dark:!text-gray-100');
+            }
+
+            if (datesWithEntries.has(dateString) && !isSameDay(date, selectedDate || new Date(0))) {
+              classes.push('has-entries');
             }
           }
           return classes.join(' ');
@@ -67,7 +94,6 @@ const MonthNavigator: React.FC<MonthNavigatorProps> = ({ selectedDate, onSelectD
             {format(date, 'MMMM yyyy')}
           </span>
         )}
-        // Add other props and styling as needed
       />
       {footer}
     </div>

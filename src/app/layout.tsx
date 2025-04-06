@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
-import { EntriesProvider } from '@/context/EntriesContext'; // Import the provider
+import { EntriesProvider } from '@/context/EntriesContext';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,18 +14,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Clarity", // Updated title
-  description: "ADHD Planning Tool PoC", // Updated description
-  icons: { // Added icons configuration
+  title: "Clarity",
+  description: "ADHD Planning Tool PoC",
+  icons: {
     icon: [
-      { url: '/favicons/favicon.ico', sizes: 'any' }, // Standard favicon
+      { url: '/favicons/favicon.ico', sizes: 'any' },
       { url: '/favicons/favicon-16x16.png', type: 'image/png', sizes: '16x16' },
       { url: '/favicons/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
     ],
-    apple: [ // Apple touch icon
+    apple: [
       { url: '/favicons/apple-touch-icon.png', type: 'image/png' },
     ],
-    // You can add other icons like android-chrome here if needed
   },
 };
 
@@ -36,7 +35,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      {/* Removed dark:bg-gray-900 dark:text-gray-100 to disable dark mode */}
       <body suppressHydrationWarning className="bg-white text-black">
         <EntriesProvider>{children}</EntriesProvider>
       </body>

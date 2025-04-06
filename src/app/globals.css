@@ -13,6 +13,22 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Style for react-calendar tiles that have entries */
+.react-calendar__tile--custom.has-entries {
+  /* Add a subtle border to indicate entries exist */
+  /* Using Tailwind color palette value */
+  border: 2px solid #fbbf24; /* amber-400 */
+  /* Ensure padding doesn't collapse the border */
+  padding: 1px; /* Adjust as needed */
+}
+/* Optional: Style for dark mode */
+@media (prefers-color-scheme: dark) {
+  .react-calendar__tile--custom.has-entries {
+     border-color: #f59e0b; /* amber-500 */
+  }
+}
+
+
 /* @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;

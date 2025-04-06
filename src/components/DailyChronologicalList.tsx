@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { Entry } from '@/types';
-import { format, parseISO, isSameDay, compareAsc } from 'date-fns';
+import { format, parseISO, compareAsc, isValid, startOfDay, isWithinInterval } from 'date-fns';
 
 interface DailyChronologicalListProps {
   selectedDate: Date | undefined;
@@ -16,10 +16,28 @@ const DailyChronologicalList: React.FC<DailyChronologicalListProps> = ({ selecte
       return [];
     }
 
+    const normalizedSelectedDate = startOfDay(selectedDate); // Normalize selected date
+
     return entries
-      .filter(entry => entry.startTime && isSameDay(parseISO(entry.startTime), selectedDate))
+      .filter(entry => {
+        if (!entry.startTime || !isValid(parseISO(entry.startTime))) {
+          return false; // Skip entries without a valid start time
+        }
+
+        const startDate = startOfDay(parseISO(entry.startTime));
+        let endDate = startDate; // Default end date
+
+        if (entry.endTime && isValid(parseISO(entry.endTime))) {
+          const parsedEndTime = startOfDay(parseISO(entry.endTime));
+          if (parsedEndTime >= startDate) { // Allow same day end date
+            endDate = parsedEndTime;
+          }
+        }
+
+        // Check if the selected date falls within the entry's interval
+        return isWithinInterval(normalizedSelectedDate, { start: startDate, end: endDate });
+      })
       .sort((a, b) => {
-        // Ensure startTime exists before comparing
         if (!a.startTime || !b.startTime) return 0;
         return compareAsc(parseISO(a.startTime), parseISO(b.startTime));
       });
@@ -33,7 +51,6 @@ const DailyChronologicalList: React.FC<DailyChronologicalListProps> = ({ selecte
     return <p className="text-center text-gray-500 dark:text-gray-400">No items scheduled for {format(selectedDate, 'PPP')}.</p>;
   }
 
-  // Simple rendering for now, styling can be enhanced later
   return (
     <div>
       <h2 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">
@@ -44,7 +61,6 @@ const DailyChronologicalList: React.FC<DailyChronologicalListProps> = ({ selecte
           <li key={entry.id} className="p-3 bg-white dark:bg-gray-800 rounded-md shadow-sm hover:shadow-md transition-shadow duration-150">
             <Link href={`/entry/${entry.id}`} className="block group">
               <div className="flex items-start space-x-3">
-                 {/* Placeholder for colored dot based on type */}
                  <span className={`mt-1 block h-2.5 w-2.5 rounded-full ${entry.isCompleted ? 'bg-gray-400' : 'bg-blue-500'}`}></span>
                  <div className="flex-1">
                     <div className="flex justify-between items-center mb-1">
