@@ -1,14 +1,18 @@
-# Clarity - ADHD Planning Tool PoC
+# Clarity - ADHD Planning Tool
 
-This is a [Next.js](https://nextjs.org) project serving as a Proof of Concept (PoC) for "Clarity", a warm, intuitive planning tool designed for individuals with ADHD.
+This is a [Next.js](https://nextjs.org) project for "Clarity", a warm, intuitive planning tool designed for individuals with ADHD.
 
 The goal is to help users go from mental chaos to clear, structured days through mind-dumping, intelligent task structuring (using AI), and visual planning.
 
-This PoC implements the core features of Phase 1:
-*   Mind Dump Input
-*   AI Categorization (Task, Event, Idea, Feeling, Note) with Priority
-*   Organized View (Grouped by category)
-*   Simple Daily Planner (Grouped by priority, basic time-boxing, drag-and-drop)
+**Current Features (End of Phase 2):**
+*   **Mind Dump:** Input area for capturing thoughts.
+*   **AI Categorization:** Automatic categorization (Task, Event, Idea, Feeling, Note) and initial priority assignment using Google Gemini.
+*   **Organized View:** Displays categorized entries grouped by type.
+*   **Entry Detail View:** Allows viewing and editing of entry details (title, category, note, start/end times).
+*   **Daily Planner:**
+    *   List View: Displays tasks grouped by priority, supports drag-and-drop reordering, and time filtering (Day/Week/Month/Year/All).
+    *   Calendar View: Displays a monthly calendar (`react-calendar`) and a chronological list of items scheduled for the selected day.
+    *   Supports Start and End times for scheduling.
 
 ## Getting Started
 
