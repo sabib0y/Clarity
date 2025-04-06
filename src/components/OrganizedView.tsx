@@ -1,17 +1,15 @@
 'use client';
 
-import React, { useState } from 'react'; // Import useState
+import React from 'react'; // Removed useState
+import Link from 'next/link'; // Import Link
+import type { Entry } from '@/types'; // Import full Entry type
 
-type Entry = {
-  id: string; 
-  text: string;
-  type: string;
-  priority: number;
-};
+// Remove local Entry type definition if it exists (it might be slightly different)
+// type Entry = { ... };
 
 type OrganizedViewProps = {
   entries: Entry[];
-  onUpdateCategory: (itemId: string, newCategory: string) => void;
+  // Removed onUpdateCategory prop
 };
 
 // Helper function to group entries by type
@@ -37,7 +35,8 @@ const categoryOrder: Record<string, number> = {
   note: 5,
 };
 
-const availableCategories = ['task', 'event', 'idea', 'feeling', 'note'];
+// Removed unused availableCategories constant
+// const availableCategories = ['task', 'event', 'idea', 'feeling', 'note'];
 
 const categoryIcons: Record<string, string> = {
   task: '✅',
@@ -52,8 +51,8 @@ const capitalizeFirstLetter = (string: string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
-const OrganizedView: React.FC<OrganizedViewProps> = ({ entries, onUpdateCategory }) => {
-  const [editingItemId, setEditingItemId] = useState<string | null>(null); // State for editing
+const OrganizedView: React.FC<OrganizedViewProps> = ({ entries }) => {
+  // Removed editingItemId state
 
   if (!entries || entries.length === 0) {
     return null; // Don't render anything if there are no entries
@@ -69,45 +68,24 @@ const OrganizedView: React.FC<OrganizedViewProps> = ({ entries, onUpdateCategory
       <h2 className="mb-6 text-xl font-semibold text-gray-900">Categorised Thoughts</h2>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {sortedCategories.map(category => (
+          // The key should ideally be on the top-level element returned by map
           <div key={category} className="rounded-lg bg-white p-4 shadow-md">
             <h3 className="mb-3 flex items-center text-md font-medium text-gray-800">
               <span className="mr-2">{categoryIcons[category] || '❓'}</span>
               {capitalizeFirstLetter(category)}s
             </h3>
-            <ul className="space-y-2">
+            <ul className="space-y-1"> {/* Reduced spacing slightly */}
               {groupedEntries[category]?.map((entry) => (
-                <li key={entry.id} className="flex items-center justify-between text-sm text-gray-700">
-                  <span>{entry.text}</span>
-                  <div className="ml-2 flex items-center space-x-1">
-                    {editingItemId === entry.id ? (
-                      <select
-                        value={entry.type}
-                        onChange={(e) => {
-                          onUpdateCategory(entry.id, e.target.value);
-                          setEditingItemId(null);
-                        }}
-                        onBlur={() => setEditingItemId(null)}
-                        className="rounded border border-gray-300 bg-white px-1 py-0.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                        autoFocus // Focus the select when it appears
-                      >
-                        {availableCategories.map((cat) => (
-                          <option key={cat} value={cat}>
-                            {capitalizeFirstLetter(cat)}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <span className="text-xs text-gray-500">({capitalizeFirstLetter(entry.type)})</span>
+                <li key={entry.id} className="text-sm text-gray-700">
+                  {/* Wrap the entry text in a Link */}
+                  <Link href={`/entry/${entry.id}`} className="flex items-center justify-between rounded p-1 hover:bg-gray-100">
+                    <span>{entry.text}</span>
+                    {/* Show note icon if note exists */}
+                    {entry.note && (
+                      <span className="ml-2 text-xs" title="Has note">🗒️</span>
                     )}
-                    <button
-                      onClick={() => setEditingItemId(entry.id)}
-                      className="p-0.5 text-gray-400 hover:text-gray-600"
-                      title="Edit category"
-                      aria-label="Edit category"
-                    >
-                      ✏️ 
-                    </button>
-                  </div>
+                  </Link>
+                  {/* Removed inline editing controls */}
                 </li>
               ))}
             </ul>

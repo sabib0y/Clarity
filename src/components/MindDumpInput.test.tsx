@@ -70,7 +70,7 @@ describe('MindDumpInput Component', () => {
 
     // Check loading state changes
     expect(mockSetIsLoading).toHaveBeenCalledWith(true);
-    expect(mockOnError).toHaveBeenCalledWith(''); // Error cleared
+    expect(mockOnError).toHaveBeenCalledWith(null); // Error cleared (should be null)
 
     // Check fetch call
     expect(global.fetch).toHaveBeenCalledWith('/api/categorise', {

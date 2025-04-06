@@ -24,7 +24,7 @@ Individuals with ADHD often struggle with:
 3.  **Visual Planning & Time-Boxing:**
     *   Intuitive drag-and-drop scheduling interface.
     *   Zoomable timelines to switch between detailed and high-level views.
-4.  **Smart Reminders:**
+4.  **Smart Reminders (Planned for Future/Premium):**
     *   Gentle, customisable nudges and notifications.
     *   Context-aware alerts (time of day, upcoming tasks, energy levels).
 5.  **ADHD-Friendly Interface:**
@@ -46,7 +46,6 @@ Individuals with ADHD often struggle with:
     *   AI Categorization (Task, Event, Idea, Feeling, Note)
     *   Organized View (Grouped by category)
     *   Simple Daily Planner (Time-boxing)
-    *   Simulated Reminders
 *   **Tech Setup:**
     *   Next.js Frontend & API Routes
     *   Google Gemini Integration
@@ -56,23 +55,13 @@ Individuals with ADHD often struggle with:
 ### Phase 2: Daily Use & Personal Structure (Weeks 5–8) - CURRENT PHASE
 *   **Enhanced Planning:**
     *   Editable tags/categories. *(Implemented 2025-04-05)*
-    *   Basic task prioritization (manual or simple AI).
-    *   Weekly view toggle.
-*   **Smart Reminders:**
-    *   More robust reminder system (beyond simple alerts).
-    *   Customizable reminder timings/sounds.
+    *   Basic task prioritization (manual or simple AI). *(Considered complete via drag-and-drop 2025-04-06)*
+    *   Planner View Toggle (List/Calendar). *(Implemented 2025-04-06)*
+    *   Implement Calendar View component. *(Implemented 2025-04-06 using react-calendar)*
 *   **Early Reflection:**
-    *   Simple daily summary/export.
+    *   ~~Simple daily summary/export.~~ *(Removed from scope 2025-04-06)*
 
-### Phase 3: Goal Hierarchy & Broader Planning (Weeks 9–12)
-*   **Zoomable Goal Layers:**
-    *   Introduce hierarchical planning (e.g., Monthly > Weekly > Daily).
-    *   Visual timeline improvements.
-*   **Intelligent Support:**
-    *   AI-powered task breakdown suggestions.
-    *   AI-driven prioritization assistance.
-
-### Phase 4: Persistence & Portability (Weeks 13–16)
+### Phase 3: Persistence & Portability (Weeks 9–12) - Renumbered
 *   **Data & Sync:**
     *   User accounts and authentication.
     *   Database integration for persistence.
@@ -80,10 +69,12 @@ Individuals with ADHD often struggle with:
 *   **Mobile Access:**
     *   Develop basic mobile web or PWA version.
 
-### Phase 5: Gamification & Community (Stretch Goals)
+### Phase 4: Gamification & Community (Stretch Goals) - Renumbered
 *   **Motivation Layer:**
     *   Streaks, points, or other gentle gamification.
     *   Progress tracking visuals.
+*   **UI Polish:**
+    *   Detail page transition animation.
 *   **User Engagement:**
     *   Optional sharing features.
     *   Community forum/support.
@@ -102,3 +93,6 @@ Individuals with ADHD often struggle with:
 *   Integration with external tools (Google Calendar, Todoist).
 *   Native mobile app.
 *   More intelligent, personalised AI nudging.
+*   **Premium Features:**
+    *   Smart Reminders (Customizable timings/sounds, context-aware alerts).
+    *   *(Add other potential premium features here)*

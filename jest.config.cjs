@@ -1,5 +1,6 @@
 // jest.config.js
-const nextJest = require('next/jest')
+// Revert ESLint disable comment - accept the warning for now
+import nextJest from 'next/jest';
 
 // Providing the path to your Next.js app to load next.config.js and .env files in your test environment
 const createJestConfig = nextJest({
@@ -43,8 +44,9 @@ const customJestConfig = {
     // https://jestjs.io/docs/webpack#mocking-css-modules
     '^.+\\.module\\.(css|sass|scss)$': 'identity-obj-proxy',
 
-    // Handle CSS imports (without CSS modules)
-    '^.+\\.(css|sass|scss)$': '<rootDir>/__mocks__/styleMock.js',
+    // Handle CSS imports (without CSS modules), EXCLUDING react-calendar's CSS
+    // Use a negative lookahead to avoid matching the specific calendar CSS file
+    '^(?!.*react-calendar/dist/Calendar\\.css$).+\\.(css|sass|scss)$': '<rootDir>/__mocks__/styleMock.js',
 
     // Handle image imports
     // https://jestjs.io/docs/webpack#handling-static-assets

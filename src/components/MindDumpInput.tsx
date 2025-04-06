@@ -13,17 +13,15 @@ interface SpeechRecognitionWindow extends Window {
 declare let window: SpeechRecognitionWindow;
 */
 
-// Define the updated Entry type matching the one in page.tsx
-type Entry = {
-  id: string; // Added unique ID
-  text: string;
-  type: string;
-  priority: number;
-};
+// Import the correct response type from shared types
+import type { CategoriseResponse } from '@/types';
+
+// Remove the local outdated Entry type definition
+// type Entry = { ... };
 
 type MindDumpInputProps = {
-  onCategorise: (data: { entries: Entry[] }) => void; // Use the updated Entry type
-  onError: (message: string) => void;
+  onCategorise: (data: CategoriseResponse) => void; // Use the imported type
+  onError: (message: string | null) => void; // Allow null for clearing errors
   setIsLoading: (isLoading: boolean) => void;
 };
 
@@ -124,7 +122,7 @@ const MindDumpInput: React.FC<MindDumpInputProps> = ({
       return;
     }
     setIsLoading(true);
-    onError(''); // Clear previous errors
+    onError(null); // Clear previous errors using null
 
     try {
       const response = await fetch('/api/categorise', {
@@ -204,14 +202,29 @@ const MindDumpInput: React.FC<MindDumpInputProps> = ({
         )}
         */}
       </div>
-      {/* Updated button styling to match image */}
-      <button
-        type="button"
-        onClick={handleSubmit}
-        className="self-center rounded-lg bg-gray-100 px-6 py-2 font-medium text-gray-800 shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
-      >
-        Categorise Thoughts
-      </button>
+      {/* Button Container */}
+      <div className="flex justify-center space-x-4">
+        {/* Categorise Button */}
+        <button
+          type="button"
+          onClick={handleSubmit}
+          className="rounded-lg bg-gray-100 px-6 py-2 font-medium text-gray-800 shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+        >
+          Categorise Thoughts
+        </button>
+        {/* Test Data Button */}
+        <button
+          type="button"
+          onClick={() => {
+            const testData = `Book dentist appointment for Tuesday afternoon.\nTeam meeting at 2pm tomorrow.\nFeeling a bit overwhelmed today.\nIdea: New structure for project notes.\nRemember to buy milk.\nPay electricity bill.`;
+            setText(testData);
+          }}
+          className="rounded-lg border border-blue-300 bg-blue-100 px-4 py-2 text-sm font-medium text-blue-700 shadow-sm hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+          title="Load sample text into the textarea"
+        >
+          Load Test Data
+        </button>
+      </div>
     </div>
   );
 };

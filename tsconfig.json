@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
-    // "types": ["jest"], // Remove Jest types again
+    // "types": ["jest"], // Remove Jest types again (reverted)
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,

@@ -1,63 +1,42 @@
 'use client'; // Convert to Client Component
 
-import React, { useState } from 'react';
+import React from 'react'; // Removed useState import
+import { useEntries } from '@/context/EntriesContext'; // Import the custom hook
+// Removed unused Entry import: import type { Entry } from '@/types';
 
 import DailyPlanner from '@/components/DailyPlanner';
 import MindDumpInput from '@/components/MindDumpInput';
 import OrganizedView from '@/components/OrganizedView';
+// Removed AgendaView import as it will be handled within DailyPlanner
 
-// Define the type for categorized entries
-type Entry = {
-  id: string; // Added unique ID
-  text: string;
-  type: string;
-  priority: number; // Added priority field
-};
-
-// Define the type for the API response structure
-type CategoriseResponse = {
-  entries: Entry[];
-};
+// Type definitions like Entry and CategoriseResponse are now likely defined globally or in types/index.ts
 
 export default function ClarityPage() {
-  const [categorizedEntries, setCategorizedEntries] = useState<Entry[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // Consume state and handlers from the context
+  const {
+    categorizedEntries,
+    isLoading,
+    errorMessage,
+    handleCategorise, // Handler from context
+    // handleUpdateCategory is no longer used here
+    setIsLoading, // Handler from context
+    setErrorMessage, // Handler from context
+  } = useEntries();
 
-  const handleCategorise = (data: CategoriseResponse) => {
-    // Add unique IDs to incoming entries
-    const entriesWithIds = (data.entries || []).map((entry) => ({
-      ...entry,
-      id: crypto.randomUUID(),
-    }));
-    setCategorizedEntries(entriesWithIds);
-    setErrorMessage(null); // Clear error on success
-  };
-
-  const handleUpdateCategory = (itemId: string, newCategory: string) => {
-    setCategorizedEntries((prevEntries) =>
-      prevEntries.map((entry) =>
-        entry.id === itemId ? { ...entry, type: newCategory } : entry
-      )
-    );
-  };
-
-  const handleError = (message: string) => {
-    setErrorMessage(message);
-    setCategorizedEntries([]); // Clear entries on error
-  };
+  // Removed activeView state
 
   return (
     <div className="container mx-auto max-w-4xl space-y-8 p-4">
-      <h1 className="text-center text-3xl font-bold">Clarity PoC</h1>
+      <h1 className="text-center text-3xl font-bold">Clarity</h1>
 
       {/* Mind Dump Section */}
       <section>
         <h2 className="mb-4 text-xl font-semibold">1. Mind Dump</h2>
         <MindDumpInput
+          // Pass handlers obtained from context
           onCategorise={handleCategorise}
-          onError={handleError}
-          setIsLoading={setIsLoading}
+          onError={setErrorMessage} // Pass the error setter from context
+          setIsLoading={setIsLoading} // Pass the loading setter from context
         />
       </section>
 
@@ -80,17 +59,18 @@ export default function ClarityPage() {
         // Added margin-top for spacing
         <section className="mt-12">
           <OrganizedView
-            entries={categorizedEntries}
-            onUpdateCategory={handleUpdateCategory} // Pass the handler
+            entries={categorizedEntries} // Pass entries from context
+            // Removed onUpdateCategory prop as it's no longer accepted by OrganizedView
           />
         </section>
       )}
 
       {/* Daily Planner Section */}
-      {!isLoading && categorizedEntries.length > 0 && (
+      {!isLoading && categorizedEntries.some(entry => entry.type === 'task') && ( // Only show if there are tasks
         // Added margin-top for spacing
         <section className="mt-12">
-          <DailyPlanner entries={categorizedEntries} />
+          {/* Removed entries prop, component now uses context */}
+          <DailyPlanner />
         </section>
       )}
     </div>

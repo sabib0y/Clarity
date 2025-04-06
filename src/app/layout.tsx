@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import './globals.css';
+import { EntriesProvider } from '@/context/EntriesContext'; // Import the provider
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Clarity PoC", // Updated title
+  title: "Clarity", // Updated title
   description: "ADHD Planning Tool PoC", // Updated description
   icons: { // Added icons configuration
     icon: [
@@ -37,7 +38,7 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       {/* Removed dark:bg-gray-900 dark:text-gray-100 to disable dark mode */}
       <body suppressHydrationWarning className="bg-white text-black">
-        {children}
+        <EntriesProvider>{children}</EntriesProvider>
       </body>
     </html>
   );
