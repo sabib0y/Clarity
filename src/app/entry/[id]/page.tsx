@@ -108,7 +108,7 @@ export default function EntryDetailPage() {
           </>
         ) : (
           <>
-            <h1 className="text-2xl font-bold">{entry.text}</h1>
+            <h1 className="text-2xl font-bold font-heading">{entry.text}</h1>
             <button
               onClick={() => setIsEditingTitle(true)}
               className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
@@ -258,7 +258,7 @@ export default function EntryDetailPage() {
 
 
        <div className="mt-6">
-        <h2 className="mb-2 text-lg font-semibold">Notes</h2>
+        <h2 className="mb-2 text-lg font-semibold font-heading">Notes</h2>
         <textarea
           placeholder="Add notes here..."
           rows={8}

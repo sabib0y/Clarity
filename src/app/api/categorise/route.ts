@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
-import type { Entry } from '@/types';
+// import type { Entry } from '@/types'; // No longer returning Entry type directly
+import { createClient } from '@/lib/supabase/server'; // Import server client
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
 
@@ -33,6 +34,17 @@ const safetySettings = [
 
 
 export async function POST(request: Request) {
+  const supabase = createClient(); // Initialize server client
+
+  // Check for authenticated user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { text } = await request.json();
 
@@ -128,17 +140,32 @@ JSON Output:`;
       );
     }
 
-    const finalEntries: Entry[] = structuredResponse.entries.map((aiEntry: Partial<AIEntry>) => ({
+    // Map AI response to database rows, including user_id
+    const entriesToInsert = structuredResponse.entries.map((aiEntry: Partial<AIEntry>) => ({
+      user_id: user.id, // Add user ID
       text: aiEntry.text!,
       type: aiEntry.type!,
       priority: aiEntry.priority!,
-      startTime: aiEntry.startTime,
-      endTime: aiEntry.endTime,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
+      start_time: aiEntry.startTime || null, // Use null for DB if undefined
+      end_time: aiEntry.endTime || null, // Use null for DB if undefined
+      // created_at is handled by DB default
+      // is_completed defaults to false in DB schema if not specified
     }));
 
-    return NextResponse.json({ entries: finalEntries });
+    // Insert entries into Supabase
+    if (entriesToInsert.length > 0) {
+        const { error: insertError } = await supabase
+            .from('entries')
+            .insert(entriesToInsert);
+
+        if (insertError) {
+            console.error('Error inserting entries into Supabase:', insertError);
+            throw new Error(`Database insert failed: ${insertError.message}`);
+        }
+    }
+
+    // Return success response (no need to return entries, client will refetch)
+    return NextResponse.json({ success: true });
 
   } catch (error) {
     console.error('Error in /api/categorise:', error);

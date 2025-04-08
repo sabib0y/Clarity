@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react'; // Added useEffect
+import Link from 'next/link'; // Added Link
 import { useEntries } from '@/context/EntriesContext';
 
 import DailyPlanner from '@/components/DailyPlanner';
@@ -13,49 +14,111 @@ export default function ClarityPage() {
     categorizedEntries,
     isLoading,
     errorMessage,
-    handleCategorise,
+    // handleCategorise, // Removed
     setIsLoading,
     setErrorMessage,
+    user, // Added user
+    fetchEntries, // Added fetchEntries
+    supabase, // Added supabase for logout
   } = useEntries();
 
+  // Fetch entries when the component mounts or user changes
+  // This might be redundant due to the context's own useEffect, but ensures data loads
+  useEffect(() => {
+    if (user) {
+      fetchEntries();
+    }
+  }, [user, fetchEntries]);
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    // The onAuthStateChange listener in the context will handle clearing state
+  };
+
+  // Show login prompt if not logged in
+  if (!user) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 text-center shadow-md dark:border-gray-700 dark:bg-gray-800">
+          <h1 className="mb-4 text-2xl font-semibold">Welcome to Clarity</h1>
+          <p className="mb-6 text-gray-600 dark:text-gray-400">
+            Please log in or sign up to continue.
+          </p>
+          <div className="flex justify-center space-x-4">
+            <Link
+              href="/auth/login"
+              className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
+            >
+              Login
+            </Link>
+            <Link
+              href="/auth/sign-up"
+              className="rounded-lg bg-green-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-800"
+            >
+              Sign Up
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Main content for logged-in users
   return (
     <div className="container mx-auto max-w-4xl space-y-8 p-4">
-      <h1 className="text-center text-3xl font-bold">Clarity</h1>
+      <div className="flex items-center justify-between">
+        {/* Apply Quicksand font to the main title */}
+        <h1 className="text-center text-3xl font-bold font-heading">Clarity</h1>
+        <button
+          onClick={handleLogout}
+          className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-800"
+        >
+          Logout
+        </button>
+      </div>
 
       <section>
-        <h2 className="mb-4 text-xl font-semibold">1. Mind Dump</h2>
+        <h2 className="mb-4 text-xl font-semibold font-heading">1. Mind Dump</h2>
         <MindDumpInput
-          onCategorise={handleCategorise}
+          // onCategorise={handleCategorise} // Removed
+          onSuccess={fetchEntries} // Call fetchEntries on successful API call
           onError={setErrorMessage}
           setIsLoading={setIsLoading}
         />
       </section>
 
-      {isLoading && (
-        <div className="text-center text-blue-600">Categorising...</div>
+      {/* Loading state now primarily reflects fetching entries */}
+      {isLoading && !errorMessage && (
+        <div className="text-center text-blue-600">Loading entries...</div>
       )}
 
       {errorMessage && (
         <div className="rounded border border-red-400 bg-red-100 p-3 text-center text-red-700">
-          Error:
-          {' '}
-          {errorMessage}
+          Error: {errorMessage}
         </div>
       )}
 
-      {!isLoading && categorizedEntries.length > 0 && (
-        <section className="mt-12">
-          <OrganizedView
-            entries={categorizedEntries}
-          />
-        </section>
-      )}
+      {/* Only show sections if not loading and no error */}
+      {!isLoading && !errorMessage && (
+        <>
+          {categorizedEntries.length > 0 && (
+            <section className="mt-12">
+              <OrganizedView entries={categorizedEntries} />
+            </section>
+          )}
 
-      {!isLoading && categorizedEntries.some(entry => entry.type === 'task') && (
-        <section className="mt-12">
-          <DailyPlanner />
-        </section>
+          {categorizedEntries.some((entry) => entry.type === 'task') && (
+            <section className="mt-12">
+              <DailyPlanner />
+            </section>
+          )}
+
+          {categorizedEntries.length === 0 && (
+             <p className="pt-4 text-center text-gray-500 dark:text-gray-400">
+               No entries yet. Use the Mind Dump above to get started!
+             </p>
+          )}
+        </>
       )}
     </div>
   );

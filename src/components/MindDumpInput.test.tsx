@@ -6,22 +6,23 @@ import MindDumpInput from './MindDumpInput';
 global.fetch = jest.fn();
 
 describe('MindDumpInput Component', () => {
-  const mockOnCategorise = jest.fn();
+  const mockOnSuccess = jest.fn(); // Renamed mock function
   const mockOnError = jest.fn();
   const mockSetIsLoading = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Mock fetch to return just OK status, no JSON needed for onSuccess
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
-      json: async () => ({ entries: [{ text: 'Test task', type: 'task', priority: 1 }] }),
+      json: async () => ({}), // Return empty object or null if needed
     });
   });
 
   test('renders the textarea and button', () => {
     render(
       <MindDumpInput
-        onCategorise={mockOnCategorise}
+        onSuccess={mockOnSuccess} // Use new prop
         onError={mockOnError}
         setIsLoading={mockSetIsLoading}
       />
@@ -34,7 +35,7 @@ describe('MindDumpInput Component', () => {
   test('calls onError when submitting empty text', () => {
     render(
       <MindDumpInput
-        onCategorise={mockOnCategorise}
+        onSuccess={mockOnSuccess} // Use new prop
         onError={mockOnError}
         setIsLoading={mockSetIsLoading}
       />
@@ -51,7 +52,7 @@ describe('MindDumpInput Component', () => {
   test('calls fetch and handlers on successful submission', async () => {
     render(
       <MindDumpInput
-        onCategorise={mockOnCategorise}
+        onSuccess={mockOnSuccess} // Use new prop
         onError={mockOnError}
         setIsLoading={mockSetIsLoading}
       />
@@ -75,8 +76,9 @@ describe('MindDumpInput Component', () => {
       body: JSON.stringify({ text: inputText }),
     });
 
+    // Check if onSuccess was called instead of onCategorise
     await waitFor(() => {
-      expect(mockOnCategorise).toHaveBeenCalledWith({ entries: [{ text: 'Test task', type: 'task', priority: 1 }] });
+      expect(mockOnSuccess).toHaveBeenCalledTimes(1);
     });
 
     expect(mockSetIsLoading).toHaveBeenCalledWith(false);
@@ -91,7 +93,7 @@ describe('MindDumpInput Component', () => {
 
     render(
       <MindDumpInput
-        onCategorise={mockOnCategorise}
+        onSuccess={mockOnSuccess} // Use new prop
         onError={mockOnError}
         setIsLoading={mockSetIsLoading}
       />
@@ -110,7 +112,7 @@ describe('MindDumpInput Component', () => {
     await waitFor(() => {
       expect(mockOnError).toHaveBeenCalledWith('Internal Server Error');
     });
-    expect(mockOnCategorise).not.toHaveBeenCalled();
+    expect(mockOnSuccess).not.toHaveBeenCalled(); // Check new prop wasn't called
     expect(mockSetIsLoading).toHaveBeenCalledWith(false);
   });
 

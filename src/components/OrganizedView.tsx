@@ -110,12 +110,12 @@ const OrganizedView: React.FC<OrganizedViewProps> = ({ entries }) => {
 
   return (
     <div>
-      <h2 className="mb-6 text-xl font-semibold text-gray-900">Categorised Thoughts</h2>
+      <h2 className="mb-6 text-xl font-semibold text-gray-900 font-heading">Categorised Thoughts</h2>
       {/* Adjust grid layout if needed, maybe single column for focus? */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {groupsToRender.map(groupName => (
           <div key={groupName} className="rounded-lg bg-white p-4 shadow-md">
-            <h3 className="mb-3 flex items-center text-md font-medium text-gray-800">
+            <h3 className="mb-3 flex items-center text-md font-medium text-gray-800 font-heading">
               <span className="mr-2">{focusIcons[groupName]}</span>
               {groupName}
             </h3>

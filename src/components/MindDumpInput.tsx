@@ -3,17 +3,17 @@
 import React, { useState } from 'react';
 
 
-import type { CategoriseResponse } from '@/types';
+// Removed CategoriseResponse import as it's no longer passed
 
 
 type MindDumpInputProps = {
-  onCategorise: (data: CategoriseResponse) => void;
+  onSuccess: () => void; // Changed prop name and signature
   onError: (message: string | null) => void;
   setIsLoading: (isLoading: boolean) => void;
 };
 
 const MindDumpInput: React.FC<MindDumpInputProps> = ({
-  onCategorise,
+  onSuccess, // Changed prop name
   onError,
   setIsLoading,
 }) => {
@@ -112,8 +112,9 @@ const MindDumpInput: React.FC<MindDumpInputProps> = ({
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      onCategorise(data);
+      // const data = await response.json(); // Don't need to parse data here anymore
+      // onCategorise(data); // Removed
+      onSuccess(); // Call the success callback
     } catch (error) {
       console.error('Error calling categorise API:', error);
       onError(error instanceof Error ? error.message : 'An unknown error occurred.');

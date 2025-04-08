@@ -8,11 +8,18 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        // Use font name directly now that <link> tag is used
+        heading: ['Quicksand', 'sans-serif'],
+        sans: ['var(--font-geist-sans)', 'sans-serif'], // Keep Geist Sans as default sans
+        mono: ['var(--font-geist-mono)', 'monospace'],
+      },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
+      // Removed duplicate backgroundImage key
     },
   },
   plugins: [],

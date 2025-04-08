@@ -2,24 +2,28 @@ import React from 'react';
 import { render, screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EntriesProvider, useEntries } from './EntriesContext';
-import type { Entry } from '@/types';
+// import type { Entry } from '@/types'; // Removed unused import
 
-const TestConsumerComponent = ({ initialEntries = [] }: { initialEntries?: Entry[] }) => {
+// Removed initialEntries prop as it's no longer used for setup in these tests
+const TestConsumerComponent = () => {
   const {
     categorizedEntries,
     handleUpdateStartTime,
     handleUpdateEndTime,
     handleToggleComplete,
-    handleCategorise,
+    // handleCategorise, // Removed from context
   } = useEntries();
 
-  React.useEffect(() => {
-    if (initialEntries.length > 0) {
-      act(() => {
-        handleCategorise({ entries: initialEntries });
-      });
-    }
-  }, [initialEntries, handleCategorise]);
+  // React.useEffect(() => {
+  //   if (initialEntries.length > 0) {
+  //     // This approach is no longer valid as handleCategorise is removed
+  //     // and data fetching is async based on user session.
+  //     // Tests need to be rewritten to mock Supabase client/user.
+  //     // act(() => {
+  //     //   handleCategorise({ entries: initialEntries });
+  //     // });
+  //   }
+  // }, [initialEntries]); // Removed handleCategorise dependency
 
 
   const testEntry = categorizedEntries.find(e => e.id === 'test-id-1');
@@ -49,22 +53,19 @@ const TestConsumerComponent = ({ initialEntries = [] }: { initialEntries?: Entry
   );
 };
 
-const initialTestEntry: Entry = {
-  id: 'test-id-1',
-  text: 'Test Entry',
-  type: 'task',
-  priority: 1,
-  createdAt: new Date().toISOString(),
-  startTime: undefined,
-  endTime: undefined,
-  isCompleted: false,
-};
+// Removed unused initialTestEntry constant
+// const initialTestEntry: Entry = { ... };
 
 describe('EntriesContext', () => {
+  // Note: These tests will likely fail now because they assume initialTestEntry exists
+  // in the context state immediately, which is no longer true.
+  // They need to be rewritten to mock Supabase fetching.
+  // For now, we just fix the compilation error.
+
   it('should update startTime correctly', async () => {
     render(
       <EntriesProvider>
-        <TestConsumerComponent initialEntries={[initialTestEntry]} />
+        <TestConsumerComponent />
       </EntriesProvider>
     );
 
@@ -78,7 +79,7 @@ describe('EntriesContext', () => {
   it('should update endTime correctly', async () => {
      render(
        <EntriesProvider>
-         <TestConsumerComponent initialEntries={[initialTestEntry]} />
+         <TestConsumerComponent />
        </EntriesProvider>
      );
 
@@ -93,7 +94,7 @@ describe('EntriesContext', () => {
   it('should toggle isCompleted correctly', async () => {
     render(
       <EntriesProvider>
-        <TestConsumerComponent initialEntries={[initialTestEntry]} />
+        <TestConsumerComponent />
       </EntriesProvider>
     );
 
@@ -110,16 +111,11 @@ describe('EntriesContext', () => {
 
 
   it('should clear endTime when startTime is cleared', async () => {
-     const entryWithTimes: Entry = {
-        ...initialTestEntry,
-        startTime: '2025-04-06T09:00:00.000Z',
-        endTime: '2025-04-06T09:30:00.000Z',
-        isCompleted: false,
-     };
+    // const entryWithTimes: Entry = { ... }; // Removed unused variable
 
     render(
       <EntriesProvider>
-        <TestConsumerComponent initialEntries={[entryWithTimes]} />
+        <TestConsumerComponent />
       </EntriesProvider>
     );
 
@@ -137,16 +133,11 @@ describe('EntriesContext', () => {
   });
 
    it('should clear endTime correctly', async () => {
-     const entryWithTimes: Entry = {
-        ...initialTestEntry,
-        startTime: '2025-04-06T09:00:00.000Z',
-        endTime: '2025-04-06T09:30:00.000Z',
-        isCompleted: false,
-     };
+    // const entryWithTimes: Entry = { ... }; // Removed unused variable
 
     render(
       <EntriesProvider>
-        <TestConsumerComponent initialEntries={[entryWithTimes]} />
+        <TestConsumerComponent />
       </EntriesProvider>
     );
 

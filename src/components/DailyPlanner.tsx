@@ -4,84 +4,48 @@ import React, { useState, useMemo } from 'react';
 import { parseISO, isValid, format, isSameDay, isSameWeek, isSameMonth, isSameYear } from 'date-fns';
 import { useEntries } from '@/context/EntriesContext';
 import type { Entry } from '@/types';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-  useSortable,
-  arrayMove,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+// Removed Dnd imports
 import Link from 'next/link';
 import AgendaView from './AgendaView';
 
 
-type SortableTaskItemProps = {
-  task: Entry;
+// Removed SortableTaskItem component
+
+// Simple Planner Item component (non-sortable) - Renamed
+type PlannerItemProps = {
+  item: Entry; // Renamed prop
 };
 
-
-function SortableTaskItem({ task }: SortableTaskItemProps) {
+function PlannerItem({ item }: PlannerItemProps) { // Renamed component and prop
   const { handleToggleComplete } = useEntries();
 
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: task.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 10 : 'auto',
-  };
-
-  const DragHandleIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5 text-gray-400 dark:text-gray-500">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
-    </svg>
-  );
+  // Only show checkbox for tasks
+  const showCheckbox = item.type === 'task';
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      className={`flex items-center rounded-md p-3 space-x-3`}
-    >
-      <input
-        type="checkbox"
-        checked={!!task.isCompleted}
-        onChange={() => handleToggleComplete(task.id)}
-        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-        onClick={(e) => e.stopPropagation()}
-      />
-      <div {...listeners} className={`${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}>
-        <DragHandleIcon />
-      </div>
-      <Link href={`/entry/${task.id}`} className={`flex-grow text-sm text-gray-800 hover:text-indigo-600 ${task.isCompleted ? 'line-through opacity-50' : ''}`}>
-        {task.text}
+    <div className="flex items-center rounded-md p-3 space-x-3">
+      {showCheckbox ? (
+        <input
+          type="checkbox"
+          checked={!!item.isCompleted}
+          onChange={() => handleToggleComplete(item.id)}
+          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+          onClick={(e) => e.stopPropagation()} // Prevent link navigation on checkbox click
+        />
+      ) : (
+        // Placeholder or icon for non-task items (e.g., events)
+        <div className="h-4 w-4 flex-shrink-0"></div> // Adjust size as needed
+      )}
+      <Link href={`/entry/${item.id}`} className={`flex-grow text-sm text-gray-800 hover:text-indigo-600 ${item.isCompleted ? 'line-through opacity-50' : ''}`}>
+        {item.text}
       </Link>
       <div className="relative flex items-center space-x-2 ml-auto">
         <div className="text-xs text-gray-600">
-          {task.startTime && isValid(parseISO(task.startTime)) ? (
+          {item.startTime && isValid(parseISO(item.startTime)) ? (
             <>
-              <span>{format(parseISO(task.startTime), 'p')}</span>
-              {task.endTime && isValid(parseISO(task.endTime)) && parseISO(task.endTime) > parseISO(task.startTime) ? (
-                <span> - {format(parseISO(task.endTime), 'p')}</span>
+              <span>{format(parseISO(item.startTime), 'p')}</span>
+              {item.endTime && isValid(parseISO(item.endTime)) && parseISO(item.endTime) > parseISO(item.startTime) ? (
+                <span> - {format(parseISO(item.endTime), 'p')}</span>
               ) : null}
             </>
           ) : (
@@ -96,7 +60,7 @@ function SortableTaskItem({ task }: SortableTaskItemProps) {
 const DailyPlanner: React.FC = () => {
   const {
      categorizedEntries,
-     handleReorderEntries,
+     // handleReorderEntries, // Removed
      handleAddTaskDirectly,
   } = useEntries();
 
@@ -104,11 +68,12 @@ const DailyPlanner: React.FC = () => {
   const [selectedTimeFilter, setSelectedTimeFilter] = useState<'day' | 'week' | 'month' | 'year' | 'all'>('all');
 
 
-  const tasks = useMemo(() => {
+  const plannerItems = useMemo(() => { // Renamed variable
     const now = new Date();
 
-    const filteredTasks = categorizedEntries.filter(entry => {
-      if (entry.type !== 'task') {
+    const filteredItems = categorizedEntries.filter(entry => { // Renamed variable
+      // Include both tasks and events
+      if (entry.type !== 'task' && entry.type !== 'event') {
         return false;
       }
 
@@ -116,24 +81,25 @@ const DailyPlanner: React.FC = () => {
         return true;
       }
 
-      const taskDate = parseISO(entry.startTime);
+      const itemDate = parseISO(entry.startTime); // Renamed variable
 
       switch (selectedTimeFilter) {
         case 'day':
-          return isSameDay(taskDate, now);
+          return isSameDay(itemDate, now);
         case 'week':
-          return isSameWeek(taskDate, now, { weekStartsOn: 1 });
+          return isSameWeek(itemDate, now, { weekStartsOn: 1 });
         case 'month':
-          return isSameMonth(taskDate, now);
+          return isSameMonth(itemDate, now);
         case 'year':
-          return isSameYear(taskDate, now);
+          return isSameYear(itemDate, now);
         case 'all':
         default:
           return true;
       }
     });
 
-    return filteredTasks.sort((a, b) => a.priority - b.priority);
+    // Sort by priority
+    return filteredItems.sort((a, b) => a.priority - b.priority); // Renamed variable
 
   }, [categorizedEntries, selectedTimeFilter]);
 
@@ -146,30 +112,7 @@ const DailyPlanner: React.FC = () => {
     setNewTaskText('');
   };
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-
-
-      const oldIndex = categorizedEntries.findIndex((entry) => entry.id === active.id);
-      const newIndex = categorizedEntries.findIndex((entry) => entry.id === over.id);
-
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const reorderedEntries = arrayMove(categorizedEntries, oldIndex, newIndex);
-        handleReorderEntries(reorderedEntries);
-      } else {
-        console.warn('Could not find dragged item or drop target in entries list.');
-      }
-    }
-  };
+  // Removed sensors and handleDragEnd
 
   const priorityMap: Record<number, string> = {
     1: 'Morning',
@@ -179,18 +122,20 @@ const DailyPlanner: React.FC = () => {
     5: 'Anytime / Flexible',
   };
 
-  const groupedTasks = tasks.reduce((acc, task) => {
-    const groupName = priorityMap[task.priority] || 'Anytime / Flexible';
+  // Group items by priority group name
+  const groupedPlannerItems = plannerItems.reduce((acc, item) => { // Renamed variable
+    const groupName = priorityMap[item.priority] || 'Anytime / Flexible'; // Use item
     if (!acc[groupName]) {
       acc[groupName] = [];
     }
-    acc[groupName].push(task);
+    acc[groupName].push(item); // Use item
     return acc;
   }, {} as Record<string, Entry[]>);
 
   const groupOrder = ['Morning', 'Midday', 'Afternoon', 'Evening', 'Anytime / Flexible'];
 
-  const sortedGroupNames = Object.keys(groupedTasks).sort((a, b) => {
+  // Sort group names based on the defined order
+  const sortedGroupNames = Object.keys(groupedPlannerItems).sort((a, b) => { // Use renamed variable
     const indexA = groupOrder.indexOf(a);
     const indexB = groupOrder.indexOf(b);
     if (indexA === -1) return 1;
@@ -200,7 +145,7 @@ const DailyPlanner: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="mb-4 text-xl font-semibold text-gray-900">Daily Planner</h2>
+      <h2 className="mb-4 text-xl font-semibold text-gray-900 font-heading">Daily Planner</h2>
 
       <div className="mb-4 border-b border-gray-200">
         <nav className="-mb-px flex space-x-8" aria-label="Tabs">
@@ -264,37 +209,28 @@ const DailyPlanner: React.FC = () => {
           </div>
 
 
-          {tasks.length === 0 && (
-             <p className="pt-2 text-gray-600 dark:text-gray-400">No tasks match the current filter.</p>
+          {plannerItems.length === 0 && ( // Use renamed variable
+             <p className="pt-2 text-gray-600 dark:text-gray-400">No tasks or events match the current filter.</p> // Updated text
           )}
 
-          {tasks.length > 0 && (
-             <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <div className="space-y-6">
-            {sortedGroupNames.map(groupName => (
-              <div key={groupName} className="rounded-lg bg-white p-4 shadow-md">
-                <h3 className="mb-3 text-md font-medium text-gray-800">{groupName}</h3>
-                <SortableContext
-                   items={groupedTasks[groupName].map(task => task.id)}
-                   strategy={verticalListSortingStrategy}
-                 >
+          {plannerItems.length > 0 && ( // Use renamed variable
+            // Removed DndContext wrapper
+            <div className="space-y-6">
+              {sortedGroupNames.map(groupName => (
+                <div key={groupName} className="rounded-lg bg-white p-4 shadow-md">
+                  <h3 className="mb-3 text-md font-medium text-gray-800 font-heading">{groupName}</h3>
+                  {/* Removed SortableContext wrapper */}
                   <div className="space-y-3">
-                    {groupedTasks[groupName].map((task) => (
-                      <SortableTaskItem
-                        key={task.id}
-                        task={task}
+                    {groupedPlannerItems[groupName].map((item) => ( // Use renamed variable and item
+                      <PlannerItem // Use the renamed PlannerItem
+                        key={item.id} // Use item
+                        item={item} // Use item
                       />
                     ))}
                   </div>
-                </SortableContext>
-              </div>
-            ))}
-          </div>
-            </DndContext>
+                </div>
+              ))}
+            </div>
           )}
         </>
       )}
