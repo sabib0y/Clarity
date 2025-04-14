@@ -8,7 +8,12 @@ export type Entry = {
   startTime?: string;
   endTime?: string;
   isCompleted?: boolean;
+  sortOrder?: number; // Added for drag-and-drop ordering
+  category?: EntryCategory; // Use the specific type
 };
+
+// Define the specific categories
+export type EntryCategory = 'Task' | 'Event' | 'Idea' | 'Feeling' | 'Note';
 
 export type CategoriseResponse = {
   entries: Entry[];

@@ -25,6 +25,7 @@ interface EntryRow {
   start_time?: string | null; // DB can have null
   end_time?: string | null; // DB can have null
   is_completed?: boolean | null; // Added completion flag
+  sort_order?: number | null; // Added for DnD ordering
 }
 
 // Map DB row to frontend Entry type
@@ -39,6 +40,7 @@ function mapRowToEntry(row: EntryRow): Entry {
     startTime: row.start_time ?? undefined, // Handle null from DB
     endTime: row.end_time ?? undefined, // Handle null from DB
     isCompleted: row.is_completed ?? false, // Handle null/missing from DB
+    sortOrder: row.sort_order ?? undefined, // Handle null/missing from DB
   };
 }
 
@@ -60,7 +62,7 @@ export interface EntriesContextType {
     itemId: string,
     newTimestamp: string | null
   ) => Promise<void>;
-  // handleReorderEntries: (reorderedEntries: Entry[]) => void; // Removed for simplicity
+  handleReorderEntries: (reorderedEntries: Entry[]) => Promise<void>; // Re-added for DnD
   handleAddTaskDirectly: (taskText: string) => Promise<void>;
   handleToggleComplete: (itemId: string) => Promise<void>;
   handleDeleteEntry: (itemId: string) => Promise<void>;
@@ -135,14 +137,22 @@ export const EntriesProvider: React.FC<EntriesProviderProps> = ({
           .from('entries')
           .select('*')
           .eq('user_id', userId)
-          .order('created_at', { ascending: false }); // Or order as needed
+          .order('sort_order', { ascending: true, nullsFirst: false }); // Order by sort_order
 
         if (error) throw error;
 
         setCategorizedEntries(data?.map(mapRowToEntry) || []);
-      } catch (error: any) {
-        console.error('Error fetching entries:', error);
-        setErrorMessage(`Failed to load entries: ${error.message}`);
+      } catch (error: unknown) { // Use unknown instead of any
+        console.error('Detailed error fetching entries:', error); // More detailed log
+        // Attempt to stringify for more info, fallback for circular structures
+        try {
+          console.error('Stringified error:', JSON.stringify(error, null, 2));
+        } catch (stringifyError) {
+          console.error('Could not stringify error:', stringifyError);
+        }
+        // Type guard to safely access error properties
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        setErrorMessage(`Failed to load entries: ${message}`);
         setCategorizedEntries([]);
       } finally {
         setIsLoading(false);
@@ -310,15 +320,42 @@ export const EntriesProvider: React.FC<EntriesProviderProps> = ({
         note: null,
         start_time: null,
         end_time: null,
-        is_completed: false,
+        // is_completed: false, // REMOVED - Let DB handle default
+        sort_order: null, // Explicitly set sort_order to null
       };
       try {
-        const { error } = await supabase.from('entries').insert(newTaskRow);
+        // Explicitly list columns in the insert object
+        const { error } = await supabase.from('entries').insert({
+          user_id: newTaskRow.user_id,
+          text: newTaskRow.text,
+          type: newTaskRow.type,
+          priority: newTaskRow.priority,
+          note: newTaskRow.note,
+          start_time: newTaskRow.start_time,
+          end_time: newTaskRow.end_time,
+          sort_order: newTaskRow.sort_order,
+          // We are still omitting is_completed, letting the DB handle the default
+        });
         if (error) throw error;
         await triggerFetchEntries(); // Re-fetch to get the new task with DB-generated ID/timestamp
       } catch (error: unknown) {
-        console.error('Error adding task:', error);
-        const message = error instanceof Error ? error.message : String(error);
+        console.error('Detailed error adding task:', error); // More detailed log
+        // Attempt to stringify for more info, fallback for circular structures
+        try {
+          console.error('Stringified error:', JSON.stringify(error, null, 2));
+        } catch (stringifyError) {
+          console.error('Could not stringify error:', stringifyError);
+        }
+        // Try to get a more specific message
+        let message = 'Unknown error';
+        if (error instanceof Error) {
+          message = error.message;
+        } else if (typeof error === 'object' && error !== null && 'message' in error) {
+          // Handle potential Supabase error object structure
+          message = String(error.message);
+        } else {
+          message = String(error);
+        }
         setErrorMessage(`Failed to add task: ${message}`);
       }
     },
@@ -350,6 +387,59 @@ export const EntriesProvider: React.FC<EntriesProviderProps> = ({
     [user, supabase, triggerFetchEntries]
   );
 
+  const handleReorderEntries = useCallback(
+    async (reorderedEntries: Entry[]) => {
+      if (!user) return;
+
+      // Optimistic update (apply immediately to UI)
+      // Ensure we are setting a NEW array reference using spread operator
+      setCategorizedEntries([...reorderedEntries]);
+
+      // Removed unused 'updates' constant
+      // Removed console.log
+
+      try {
+        // Removed console.log
+        // Prepare updates for Supabase using explicit update calls
+        const updatePromises = reorderedEntries.map((entry, index) =>
+          supabase
+            .from('entries')
+            .update({ sort_order: index })
+            .eq('id', entry.id)
+            // Ensure user owns the entry being updated (redundant if RLS is correct, but safe)
+            .eq('user_id', user.id)
+        );
+
+        // Removed console.log
+        // Execute all update promises
+        const results = await Promise.all(updatePromises);
+        // Removed console.log
+
+        // Check for errors in any of the updates
+        const updateError = results.find((result) => result.error)?.error;
+
+        if (updateError) {
+          // Removed console.error
+          // Revert optimistic update on error
+          // Removed console.log
+          await triggerFetchEntries();
+          throw updateError; // Throw the specific Supabase error
+        }
+        // Removed console.log
+        // No need to re-fetch on success, rely on optimistic update.
+        // await triggerFetchEntries(); // REMOVED THIS LINE
+      } catch (error: unknown) { // Catch errors from Promise.all or the throw above
+        // Removed console.error
+        const message = error instanceof Error ? error.message : String(error);
+        setErrorMessage(`Failed to reorder entries: ${message}`);
+        // Ensure UI reverts if something went wrong
+        await triggerFetchEntries();
+      }
+    },
+    [user, supabase, triggerFetchEntries]
+  );
+
+
   // --- End Refactored Handlers ---
 
   const handleSetError = useCallback((message: string | null) => {
@@ -373,7 +463,7 @@ export const EntriesProvider: React.FC<EntriesProviderProps> = ({
     handleUpdateTitle,
     handleUpdateStartTime,
     handleUpdateEndTime,
-    // handleReorderEntries, // Removed
+    handleReorderEntries, // Re-added
     handleAddTaskDirectly,
     handleToggleComplete,
     handleDeleteEntry,

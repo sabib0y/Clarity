@@ -51,13 +51,29 @@ Implement database persistence and user authentication using Supabase. Begin UI/
     *   Comment out broken unit tests requiring Supabase mocking.
     *   **Status:** [X] Done (Manual testing successful, unit tests deferred)
 
-## Next Steps: UI/UX Refinement
+## Next Steps: UI/UX Refinement (Current Session: 2025-04-12 PM)
 
-*   **Goal:** Improve the overall look, feel, and usability of the application.
-*   **Areas to Review (based on user feedback):**
-    *   [ ] Main page layout/styling (Mind Dump, Organized View, Daily Planner sections).
+*   **Goal:** Improve the overall look, feel, and usability of the application based on user feedback.
+*   **Completed Changes (This Session):**
+    *   [X] Re-implemented Drag-and-Drop (DnD) sorting for Daily Planner list view (`src/components/DailyPlanner.tsx`, `src/context/EntriesContext.tsx`).
+        *   Added `sort_order` column to `entries` table in Supabase.
+        *   Updated RLS policies for `UPDATE`.
+        *   Switched from `upsert` to `update` in context handler.
+        *   Implemented local state management in `DailyPlanner` for instant UI feedback.
+        *   Resolved navigation conflict by using a dedicated drag handle.
+    *   [X] Fixed task adding via Daily Planner input (`src/context/EntriesContext.tsx`).
+        *   Diagnosed and resolved schema cache error by adding `is_completed` column to `entries` table.
+    *   [X] Restyled Logout button (`src/app/page.tsx`) with custom outlined style.
+    *   [X] Restyled Mind Dump buttons (`src/components/MindDumpInput.tsx`) with custom outlined style.
+    *   [X] Updated Mind Dump textarea style (`src/components/MindDumpInput.tsx`).
+    *   [X] Updated application fonts (Lexend for body/buttons, Quicksand for headings) via `globals.css` and Tailwind config (`src/app/layout.tsx`, `src/app/globals.css`, `tailwind.config.ts`).
+    *   [X] Replaced delete icon in Organized View with Font Awesome icon (`src/components/OrganizedView.tsx`).
+    *   [X] Replaced clock icon in Organized View with Font Awesome icon (`src/components/OrganizedView.tsx`).
+    *   [X] Fixed text truncation issue in Organized View (`src/components/OrganizedView.tsx`).
+    *   [X] Removed hover text color change in Organized View (`src/components/OrganizedView.tsx`).
+*   **Remaining Areas to Review:**
     *   [ ] Login/Sign-up page appearance.
-    *   [ ] Calendar view refinement.
+    *   [ ] Calendar view refinement (`src/components/AgendaView.tsx`).
     *   [ ] Entry Detail page (`/entry/[id]`) improvements.
     *   [ ] Other specific areas identified by the user.
-*   **Plan:** Discuss specific areas with the user and implement changes iteratively.
+*   **Plan:** Continue implementing UI/UX refinements based on user feedback.

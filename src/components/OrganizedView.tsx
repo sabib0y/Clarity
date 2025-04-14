@@ -83,11 +83,11 @@ const groupEntriesByFocus = (entries: Entry[]): Record<FocusGroup, Entry[]> => {
 };
 
 
-// Define icons for the new groups
+// Define icons for the new groups using Font Awesome classes
 const focusIcons: Record<FocusGroup, string> = {
-  'Focus Now': '🔥',
-  'Later': '⏳',
-  'Notes': '📝',
+  'Focus Now': 'fa-solid fa-fire-flame-simple', // Fire icon
+  'Later': 'fa-solid fa-hourglass-half',      // Hourglass icon
+  'Notes': 'fa-regular fa-note-sticky',       // Sticky note icon
 };
 
 // Define the desired order for the groups
@@ -111,37 +111,35 @@ const OrganizedView: React.FC<OrganizedViewProps> = ({ entries }) => {
   return (
     <div>
       <h2 className="mb-6 text-xl font-semibold text-gray-900 font-heading">Categorised Thoughts</h2>
-      {/* Adjust grid layout if needed, maybe single column for focus? */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {groupsToRender.map(groupName => (
           <div key={groupName} className="rounded-lg bg-white p-4 shadow-md">
             <h3 className="mb-3 flex items-center text-md font-medium text-gray-800 font-heading">
-              <span className="mr-2">{focusIcons[groupName]}</span>
+              <span className={`mr-2 w-4 text-center ${groupName === 'Focus Now' ? 'text-[#183153]' : 'text-gray-500'}`}>
+                <i className={focusIcons[groupName]}></i>
+              </span>
               {groupName}
             </h3>
             <ul className="space-y-1">
               {groupedEntries[groupName]?.map((entry) => (
                 <li key={entry.id} className="text-sm text-gray-700">
                   <div className="flex items-center justify-between rounded p-1 hover:bg-gray-100 group">
-                    {/* Link for entry text and icons */}
-                    <Link href={`/entry/${entry.id}`} className="flex items-center flex-grow mr-2"> {/* Allow link to grow */}
-                      <span className="group-hover:text-blue-600 truncate">{entry.text}</span> {/* Add truncate */}
-                      {/* Icon container */}
-                      <div className="flex items-center space-x-1 ml-2 flex-shrink-0"> {/* Prevent icons shrinking */}
-                        {/* Show clock icon if startTime exists */}
+                    <Link href={`/entry/${entry.id}`} className="flex items-center flex-grow mr-2 min-w-0">
+                      <span className="truncate">{entry.text}</span> {/* Removed group-hover:text-blue-600 */}
+                      <div className="flex items-center space-x-1 ml-2 flex-shrink-0">
                         {entry.startTime && (
-                          <span className="text-xs" title="Has scheduled time">⏰</span>
+                          <i className="fa-regular fa-clock text-gray-500" title="Has scheduled time"></i>
                         )}
-                        {/* Show note icon if note exists */}
                         {entry.note && (
-                          <span className="text-xs" title="Has note">🗒️</span>
+                          <span className="text-xs" title="Has note">
+                            🗒️
+                          </span>
                         )}
                       </div>
                     </Link>
-                    {/* Delete Button */}
                     <button
                       onClick={async (e) => {
-                        e.stopPropagation(); // Prevent link navigation
+                        e.stopPropagation();
                         const isConfirmed = await confirmDelete(
                           'Are you sure?',
                           `Do you really want to delete "${entry.text}"?`
@@ -150,13 +148,10 @@ const OrganizedView: React.FC<OrganizedViewProps> = ({ entries }) => {
                           handleDeleteEntry(entry.id);
                         }
                       }}
-                      className="ml-2 p-1 rounded text-red-500 hover:bg-red-100 hover:text-red-700 flex-shrink-0"
+                      className="ml-2 p-1 rounded text-[#183153] hover:bg-gray-100 flex-shrink-0"
                       title="Delete Entry"
                     >
-                      {/* Simple X icon */}
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                      </svg>
+                      <i className="fa-regular fa-trash-can"></i>
                     </button>
                   </div>
                 </li>

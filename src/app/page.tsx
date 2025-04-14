@@ -71,14 +71,14 @@ export default function ClarityPage() {
         <h1 className="text-center text-3xl font-bold font-heading">Clarity</h1>
         <button
           onClick={handleLogout}
-          className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-800"
+          className="py-2 px-4 bg-transparent border border-stone-900 rounded-full text-stone-900 text-base shadow-none transition-all duration-200 hover:-translate-y-1 hover:shadow-[0px_6px_1px_#141211] active:translate-y-1 active:shadow-none" // Removed font-sans (will inherit from body)
         >
           Logout
         </button>
       </div>
 
       <section>
-        <h2 className="mb-4 text-xl font-semibold font-heading">1. Mind Dump</h2>
+        <h2 className="mb-4 text-xl font-semibold font-heading">Mind Dump</h2>
         <MindDumpInput
           // onCategorise={handleCategorise} // Removed
           onSuccess={fetchEntries} // Call fetchEntries on successful API call

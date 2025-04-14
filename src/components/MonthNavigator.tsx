@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
+// import 'react-calendar/dist/Calendar.css'; // Removed default styles
 import { format, parseISO, isValid, isSameDay, eachDayOfInterval, startOfDay } from 'date-fns';
 import type { Entry } from '@/types';
 
@@ -71,26 +71,25 @@ const MonthNavigator: React.FC<MonthNavigatorProps> = ({ selectedDate, onSelectD
       <Calendar
         onChange={handleChange}
         value={selectedDate}
-        className="react-calendar bg-transparent border-none"
+        className="react-calendar" // Removed bg-transparent border-none, handled globally now
         tileClassName={({ date, view }) => {
-          const classes = ['react-calendar__tile--custom rounded-full flex items-center justify-center h-9 w-9'];
+          // Keep the base custom class for targeting
+          const classes = ['react-calendar__tile--custom'];
           const dateString = format(date, 'yyyy-MM-dd');
 
-          if (view === 'month') {
-            classes.push('hover:bg-gray-100 dark:hover:bg-gray-700');
-
-            if (dateString === format(new Date(), 'yyyy-MM-dd') && !isSameDay(date, selectedDate || new Date(0))) {
-              classes.push('!bg-gray-200 dark:!bg-gray-600 !text-gray-900 dark:!text-gray-100');
-            }
-
-            if (datesWithEntries.has(dateString) && !isSameDay(date, selectedDate || new Date(0))) {
-              classes.push('has-entries');
-            }
+          // Add 'has-entries' class if applicable (used by global CSS for the dot)
+          // Note: We check !isSameDay to avoid adding the dot to the selected day itself,
+          // assuming the selection style takes precedence. Adjust if needed.
+          if (view === 'month' && datesWithEntries.has(dateString) && !isSameDay(date, selectedDate || new Date(0))) {
+            classes.push('has-entries');
           }
+
+          // Removed redundant layout/sizing/state classes (handled globally)
           return classes.join(' ');
         }}
         navigationLabel={({ date }) => (
-          <span className="text-lg font-medium text-gray-900 dark:text-gray-100">
+          // Removed inline text styling, handled globally now
+          <span>
             {format(date, 'MMMM yyyy')}
           </span>
         )}

@@ -1,10 +1,10 @@
 # Technical Debt Backlog
 
-## Font Optimization (Quicksand) - 2025-04-07
+## Font Optimization (Quicksand & Lexend) - Updated 2025-04-12
 
-*   **Issue:** The standard `next/font/google` approach (importing font, using CSS variable in layout and Tailwind config) failed to apply the 'Quicksand' font correctly to headings, despite multiple attempts and server restarts.
-*   **Workaround:** Implemented a workaround using direct `<link>` tags in `src/app/layout.tsx` and a direct CSS rule (`.font-heading { font-family: 'Quicksand', sans-serif; }`) in `src/app/globals.css`.
-*   **Debt:** Revisit this implementation to debug the `next/font` CSS variable issue and utilize Next.js's built-in font optimization features for better performance and maintainability.
+*   **Issue:** The standard `next/font/google` approach (importing font, using CSS variable in layout and Tailwind config) failed to apply the 'Quicksand' font correctly to headings and the 'Lexend' font to the body, despite multiple attempts and server restarts.
+*   **Workaround:** Implemented a workaround using direct `<link>` tags in `src/app/layout.tsx` and direct CSS rules (`body { font-family: 'Lexend', ...; }`, `.font-heading { font-family: 'Quicksand', ...; }`) in `src/app/globals.css`. The Tailwind font configuration was simplified to avoid conflicts.
+*   **Debt:** Revisit this implementation to debug the `next/font` CSS variable issue and utilize Next.js's built-in font optimization features for better performance and maintainability for both fonts.
 
 ## Deprecated Supabase Server Client Usage - 2025-04-08
 

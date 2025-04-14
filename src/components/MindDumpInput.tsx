@@ -152,24 +152,26 @@ const MindDumpInput: React.FC<MindDumpInputProps> = ({
           onChange={e => setText(e.target.value)}
           placeholder="Dump your thoughts here... (e.g., Book dentist appointment, Team call at 2pm, Feeling anxious...)"
           rows={10}
-          className="w-full rounded border border-gray-200 bg-white p-3 text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 placeholder-gray-400"
+          className="w-full rounded border border-stone-900 bg-white p-3 text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 placeholder-gray-400" // Reverted background, changed border, text, placeholder
         />
       </div>
       <div className="flex justify-center space-x-4">
+        {/* Apply custom button style */}
         <button
           type="button"
           onClick={handleSubmit}
-          className="rounded-lg bg-gray-100 px-6 py-2 font-medium text-gray-800 shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+          className="py-2 px-4 bg-transparent border border-stone-900 rounded-full text-stone-900 text-base shadow-none transition-all duration-200 hover:-translate-y-1 hover:shadow-[0px_6px_1px_#141211] active:translate-y-1 active:shadow-none" // Removed font-sans
         >
           Categorise Thoughts
         </button>
+        {/* Apply custom button style */}
         <button
           type="button"
           onClick={() => {
             const testData = `Book dentist appointment for Tuesday afternoon.\nTeam meeting at 2pm tomorrow.\nFeeling a bit overwhelmed today.\nIdea: New structure for project notes.\nRemember to buy milk.\nPay electricity bill.\nVacation next thursday for 3 days.`;
             setText(testData);
           }}
-          className="rounded-lg border border-blue-300 bg-blue-100 px-4 py-2 text-sm font-medium text-blue-700 shadow-sm hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+          className="py-2 px-4 bg-transparent border border-stone-900 rounded-full text-stone-900 text-base shadow-none transition-all duration-200 hover:-translate-y-1 hover:shadow-[0px_6px_1px_#141211] active:translate-y-1 active:shadow-none" // Removed font-sans
           title="Load sample text into the textarea"
         >
           Load Test Data

@@ -9,10 +9,9 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        // Use font name directly now that <link> tag is used
-        heading: ['Quicksand', 'sans-serif'],
-        sans: ['var(--font-geist-sans)', 'sans-serif'], // Keep Geist Sans as default sans
-        mono: ['var(--font-geist-mono)', 'monospace'],
+        // Removed heading and sans definitions as they are handled in globals.css
+        mono: ['var(--font-geist-mono)', 'monospace'], // Keep Geist Mono for mono
+        // Removed lexend and quicksand specific keys
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

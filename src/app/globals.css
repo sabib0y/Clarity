@@ -39,10 +39,119 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  /* font-family: Arial, Helvetica, sans-serif; <-- Removed to allow Tailwind fonts to apply */
+  /* Apply Lexend as the default body font */
+  font-family: 'Lexend', sans-serif;
 }
 
 /* Directly apply Quicksand to the .font-heading class */
 .font-heading {
   font-family: 'Quicksand', sans-serif;
 }
+
+/* Custom React Calendar Styles */
+.react-calendar {
+  /* Removed dark:bg-gray-800 */
+  @apply w-full max-w-xs border-none bg-white rounded-lg shadow-md p-4;
+  font-family: 'Lexend', sans-serif; /* Ensure consistent font */
+}
+
+/* Navigation */
+.react-calendar__navigation {
+  @apply flex justify-between items-center mb-4;
+}
+
+.react-calendar__navigation button {
+  /* Removed dark:text-gray-300 and dark:hover:bg-gray-700 */
+  @apply min-w-0 p-2 rounded-md bg-transparent text-gray-700 hover:bg-gray-100;
+  transition: background-color 150ms;
+}
+
+.react-calendar__navigation button:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.react-calendar__navigation__label {
+  /* Removed dark:text-gray-100 */
+  @apply font-semibold text-gray-900 flex-grow text-center mx-2;
+}
+
+/* Weekdays */
+.react-calendar__month-view__weekdays {
+  /* Removed dark:text-gray-400 */
+  @apply text-center font-medium text-xs text-gray-500 mb-2;
+}
+
+.react-calendar__month-view__weekdays__weekday abbr {
+  @apply no-underline; /* Remove default underline */
+}
+
+/* Date Tiles */
+.react-calendar__tile {
+  /* Removed dark:text-gray-200 */
+  @apply text-center text-sm leading-loose rounded-full bg-transparent text-gray-800 border border-transparent;
+  transition: background-color 150ms, color 150ms;
+  aspect-ratio: 1 / 1; /* Make tiles square/circular */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.react-calendar__tile:disabled {
+  /* Removed dark:text-gray-500 */
+  @apply text-gray-400;
+}
+
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  /* Removed dark:bg-gray-700 */
+  @apply bg-gray-100 cursor-pointer;
+}
+
+/* Today's Date */
+.react-calendar__tile--now {
+  /* Removed dark:!bg-gray-600 */
+  @apply !bg-gray-200 font-semibold;
+}
+.react-calendar__tile--now:enabled:hover,
+.react-calendar__tile--now:enabled:focus {
+  /* Removed dark:!bg-gray-500 */
+   @apply !bg-gray-300;
+}
+
+
+/* Selected Date */
+.react-calendar__tile--active {
+  /* Removed dark mode overrides, using light mode style */
+  @apply !bg-gray-900 !text-white font-semibold;
+}
+.react-calendar__tile--active:enabled:hover,
+.react-calendar__tile--active:enabled:focus {
+  /* Removed dark mode overrides */
+  @apply !bg-gray-700;
+}
+
+/* Tiles with Entries - Dot Indicator */
+.react-calendar__tile--custom.has-entries {
+  position: relative;
+  border: none !important; /* Override previous border style */
+  padding: 0 !important; /* Override previous padding */
+}
+
+.react-calendar__tile--custom.has-entries::after {
+  content: '';
+  position: absolute;
+  bottom: 4px; /* Adjust position as needed */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #fbbf24; /* amber-400 */
+}
+
+/* Removed dark mode dot override, use light mode color */
+/* @media (prefers-color-scheme: dark) {
+  .react-calendar__tile--custom.has-entries::after {
+    background-color: #f59e0b; // amber-500
+  }
+} */
